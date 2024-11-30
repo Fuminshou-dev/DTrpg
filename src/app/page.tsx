@@ -17,11 +17,11 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 
 export default function Home() {
-  const [isAdult, setIsAdult] = useState(true); // TODO: change to false and figure out a way to not show dialog everytime
+  const [isAdult, setIsAdult] = useState(false); // TODO: change to false and figure out a way to not show dialog everytime
   const [isExplainRules, setExplainRules] = useState(false);
   return (
     <div className="h-screen">
-      {/* <div>
+      <div>
         <AlertDialog open={!isAdult}>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -44,7 +44,7 @@ export default function Home() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </div> */}
+      </div>
       <div
         className={
           isAdult

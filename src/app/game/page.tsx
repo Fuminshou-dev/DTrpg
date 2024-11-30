@@ -25,36 +25,34 @@ export default function CharacterCreation() {
       <div>
         <AlertDialog open={!characterCreated}>
           <AlertDialogContent className="">
-            <form>
-              <AlertDialogHeader className="flex justify-center items-center">
-                <AlertDialogTitle>
-                  Please enter the name of your character.
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  <Input
-                    required
-                    placeholder="Name of your character..."
-                    onChange={(e) => setCharacterName(e.target.value)}
-                  ></Input>
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogAction asChild>
-                  <Button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (characterName == "") {
-                        alert("No character name");
-                        return;
-                      }
-                      setCharactedCreated(true);
-                    }}
-                  >
-                    Confirm
-                  </Button>
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </form>
+            <AlertDialogHeader className="flex justify-center items-center">
+              <AlertDialogTitle>
+                Please enter the name of your character.
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                <Input
+                  required
+                  placeholder="Name of your character..."
+                  onChange={(e) => setCharacterName(e.target.value)}
+                ></Input>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction asChild>
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (characterName == "") {
+                      alert("No character name");
+                      return;
+                    }
+                    setCharactedCreated(true);
+                  }}
+                >
+                  Confirm
+                </Button>
+              </AlertDialogAction>
+            </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       </div>

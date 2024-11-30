@@ -14,10 +14,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input";
-import { action } from "../../../convex/_generated/server";
 
 const options = [
   {
@@ -26,7 +23,7 @@ const options = [
   },
   {
     name: "Brothel",
-    redirect: "/",
+    redirect: "/brothel",
   },
   {
     name: "Shop",
@@ -87,7 +84,12 @@ export default function Game() {
                 After pressing confirm button you will leave the page.
               </AlertDialogDescription>
             </AlertDialogHeader>
+
             <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setLeavePage(false)}>
+                Cancel
+              </AlertDialogCancel>
+
               <AlertDialogAction asChild>
                 <Button
                   onClick={() => {
