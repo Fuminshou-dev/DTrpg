@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
+import { handleClientScriptLoad } from "next/script";
 
 export const createPlayer = mutation({
   args: { player_name: v.string(), password: v.string() },
@@ -22,5 +23,16 @@ export const createPlayer = mutation({
     });
 
     return characterId;
+  },
+});
+
+export const getPlayer = query({
+  args: { playerName: v.string() },
+  handler: async (ctx, args) => {
+    const player = ctx.db
+      .query("players")
+      .filter((q) => q.eq(q.field("player_name"), args.playerName))
+      .first();
+    return player;
   },
 });

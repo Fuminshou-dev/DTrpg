@@ -20,12 +20,18 @@ export const getRandomTask = query({
 });
 
 export const completedBrothelTask = mutation({
-  args: { money: v.float64() }, // TODO: look for a specific player
+  args: { player_name: v.string(), money: v.float64() }, // TODO: look for a specific player
   handler: async (ctx, args) => {
-    const player = await ctx.db.query("players").unique();
-    const currentGold = player!.gold;
+    const player = await ctx.db
+      .query("players")
+      .filter((q) => q.eq(q.field("player_name"), args.player_name))
+      .first();
+    if (!player) {
+      return "No such player";
+    }
+    const currentGold = player.gold;
     const newGold = currentGold + args.money;
-    await ctx.db.patch(player!._id, { gold: newGold });
+    await ctx.db.patch(player._id, { gold: newGold });
     return player!.gold;
   },
 });

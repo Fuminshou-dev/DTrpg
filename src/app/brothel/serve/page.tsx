@@ -6,12 +6,18 @@ import { api } from "../../../../convex/_generated/api";
 import Link from "next/link";
 import { useState } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { redirect } from "next/navigation";
 
 export default function ServePage() {
   const [isLoading, setIsLoading] = useState(false);
   const updateGold = useMutation(api.customer_tasks.completedBrothelTask);
   const customer = useQuery(api.customers.getRandomCustomer);
   const task = useQuery(api.customer_tasks.getRandomTask);
+  const playerName = localStorage.getItem("characterName");
+
+  if (!playerName) {
+    return "No character";
+  }
 
   if (!customer || !task) {
     return (
@@ -66,7 +72,8 @@ export default function ServePage() {
             <Button
               variant={"default"}
               onClick={() => {
-                updateGold({ money: earnedGold });
+                updateGold({ player_name: playerName, money: earnedGold });
+                redirect("/brothel");
               }}
             >
               Success

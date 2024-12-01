@@ -123,12 +123,13 @@ export default function CharacterCreation() {
         </div>
         <Button
           asChild
-          onClick={() =>
+          onClick={() => {
             createNewCharacter({
               player_name: characterName,
               password: characterPassword,
-            })
-          }
+            });
+            localStorage.setItem("characterName", characterName);
+          }}
         >
           <Link href={"/main"}>Let's go</Link>
         </Button>

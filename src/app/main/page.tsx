@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { redirect } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +15,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 const options = [
   {
@@ -37,16 +39,56 @@ const options = [
 
 export default function Game() {
   const [leavePage, setLeavePage] = useState(false);
+  const [progressValue, setProgressValue] = useState(0);
+  const playerName = localStorage.getItem("characterName");
+
+  const player = useQuery(api.players.getPlayer, {
+    playerName: playerName ?? "",
+  });
+
+  const playerLevel = player?.level ?? 1;
+  const nextPlayerLevel: number = playerLevel + 1;
+
+  const levelStats = useQuery(api.player_stats.getLevelStats, {
+    level: playerLevel,
+  });
+
+  const nextLevelStats = useQuery(api.player_stats.getLevelStats, {
+    level: nextPlayerLevel,
+  });
+
+  useEffect(() => {
+    if (player && nextLevelStats) {
+      setProgressValue(
+        (player.current_exp / nextLevelStats.required_exp) * 100
+      );
+    }
+  }, [player, nextLevelStats]);
+
+  // Error handling after all Hooks
+  if (!playerName) {
+    return <p>No character found. Please create or login with a character.</p>;
+  }
+
+  if (!player || !levelStats || !nextLevelStats) {
+    return <p>Loading...</p>;
+  }
+
   return (
     <div className="container mx-auto h-screen flex flex-row justify-evenly items-center">
       <div>
         <div className="flex flex-col gap-4 justify-center items-center border rounded-lg p-4">
-          <h2 className="text-3xl">Clarissa</h2>
+          <h2 className="text-3xl">{player.player_name}</h2>
           <Skeleton className="w-16 h-16 rounded-lg"></Skeleton>
-          <p className="text-2xl">Lvl: lvl</p>
-          <p className="text-2xl">Hp: hp</p>
-          <p className="text-2xl">Attack: attack</p>
-          <Progress value={50} className="" />
+          <p className="text-2xl">Lvl: {player.level}</p>
+          <p className="text-2xl">Hp: {levelStats.hp}</p>
+          <p className="text-2xl">Attack: {levelStats.atk}</p>
+          <p className="text-2xl">Gold: {player.gold}</p>
+          <p className="text-2xl">
+            Exp for next level:{" "}
+            {nextLevelStats.required_exp - player.current_exp}
+          </p>
+          <Progress value={progressValue} className="" />
         </div>
         <div className="flex flex-col gap-2 justify-between items-center p-6">
           <h1>Backpack</h1>
