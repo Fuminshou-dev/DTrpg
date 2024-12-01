@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import React from "react";
 import { api } from "../../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function BrothelPage() {
   const customers = useQuery(api.customers.getAllCustomers);
@@ -20,7 +21,7 @@ export default function BrothelPage() {
                 {customer.customerType} customer
               </p>
               <div className="flex flex-col text-xl justify-center items-center text-center">
-                {customer.price == "1" ? (
+                {customer.price === 1 ? (
                   <p>Pays the usual price</p>
                 ) : (
                   <p>
@@ -29,7 +30,7 @@ export default function BrothelPage() {
                     the price
                   </p>
                 )}
-                {customer.task == "1" ? (
+                {customer.task === 1 ? (
                   <p>
                     You do the task
                     <span className="text-green-500"> {customer.task} </span>
@@ -47,7 +48,9 @@ export default function BrothelPage() {
         ))}
       </div>
       <div>
-        <Button className="w-24 h-12">Serve</Button>
+        <Button className="w-24 h-12" asChild>
+          <Link href={"/brothel/serve"}>Serve</Link>
+        </Button>
       </div>
     </div>
   );
