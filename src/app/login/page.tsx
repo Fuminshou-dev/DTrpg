@@ -11,14 +11,17 @@ export default function LoginPage() {
   const [characterPassword, setCharacterPassword] = useState("");
   const [isError, setIsError] = useState(false);
   const player = useQuery(api.players.getPlayer, {
-    playerName: characterName,
-    password: characterPassword,
+    playerName: characterName ?? "",
+    password: characterPassword ?? "",
   });
-
   const handleLogin = () => {
-    localStorage.setItem("characterName", characterName);
-    localStorage.setItem("characterPassword", characterPassword);
-    redirect("/confirm-character");
+    if (player) {
+      localStorage.setItem("characterName", characterName);
+      localStorage.setItem("characterPassword", characterPassword);
+      redirect("/confirm-character");
+    } else {
+      setIsError(true);
+    }
   };
   return (
     <div className="flex h-screen justify-center items-center">
