@@ -35,13 +35,18 @@ export default defineSchema({
     current_exp: v.float64(),
     gold: v.float64(),
     img: v.string(),
-    items: v.array(v.object({})),
+    items: v.array(
+      v.object({
+        amount: v.number(),
+        type: v.string(),
+      })
+    ),
     level: v.float64(),
     password: v.string(),
     player_name: v.string(),
   }),
   shop_items: defineTable({
-    amount: v.string(),
+    amount: v.number(),
     effectDescription: v.string(),
     item: v.string(),
     price: v.float64(),

@@ -9,7 +9,6 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { redirect } from "next/navigation";
 
 export default function ServePage() {
-  const [isLoading, setIsLoading] = useState(false);
   const updateGold = useMutation(api.customer_tasks.completedBrothelTask);
   const customer = useQuery(api.customers.getRandomCustomer);
   const task = useQuery(api.customer_tasks.getRandomTask);

@@ -10,7 +10,9 @@ export const createPlayer = mutation({
       .filter((q) => q.eq(q.field("player_name"), args.player_name))
       .first();
     if (existing) {
-      throw new Error("Character name already taken");
+      throw new Error("Character name already taken", {
+        cause: "character already exists",
+      });
     }
     const characterId = await ctx.db.insert("players", {
       player_name: args.player_name,
@@ -18,7 +20,24 @@ export const createPlayer = mutation({
       gold: 0,
       current_exp: 0,
       img: "",
-      items: [{}],
+      items: [
+        {
+          amount: 0,
+          type: "reroll",
+        },
+        {
+          amount: 0,
+          type: "restore1",
+        },
+        {
+          amount: 0,
+          type: "restore2",
+        },
+        {
+          amount: 0,
+          type: "special",
+        },
+      ],
       level: 1,
     });
 
@@ -27,12 +46,21 @@ export const createPlayer = mutation({
 });
 
 export const getPlayer = query({
-  args: { playerName: v.string() },
+  args: { password: v.string(), playerName: v.string() },
   handler: async (ctx, args) => {
-    const player = ctx.db
+    const player = await ctx.db
       .query("players")
-      .filter((q) => q.eq(q.field("player_name"), args.playerName))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("player_name"), args.playerName),
+          q.eq(q.field("password"), args.password)
+        )
+      )
       .first();
+
+    if (!player) {
+      throw new Error("No such player found.");
+    }
     return player;
   },
 });
