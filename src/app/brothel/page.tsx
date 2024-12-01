@@ -1,15 +1,27 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import React from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function BrothelPage() {
+  const [isLoading, setIsLoading] = useState(false);
   const customers = useQuery(api.customers.getAllCustomers);
+  useEffect(() => {
+    if (!customers) {
+      setIsLoading(true);
+    } else {
+      setIsLoading(false);
+    }
+  }, [customers]);
   return (
     <div className="flex flex-col h-screen justify-center items-center gap-8 container mx-auto">
+      <div className={isLoading ? "block" : "hidden"}>
+        <LoadingSpinner className="size-24"></LoadingSpinner>
+      </div>
       <div className="grid grid-cols-3 gap-4">
         {customers?.map((customer) => (
           <div

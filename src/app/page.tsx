@@ -88,7 +88,7 @@ export default function Home() {
               <AlertDialogAction
                 onClick={() => {
                   setExplainRules(false);
-                  redirect("/game");
+                  redirect("/create-character");
                 }}
               >
                 Got it, let's go.
