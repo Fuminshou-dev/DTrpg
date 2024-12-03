@@ -3,20 +3,17 @@
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { useQuery } from "convex/react";
+import { Authenticated, useQuery } from "convex/react";
+import restore1 from "../../../public/restore1.jpg";
+import restore2 from "../../../public/restore2.jpg";
+import reroll from "../../../public/reroll.jpg";
+import special from "../../../public/special.jpg";
+import Image from "next/image";
+import { SignOutButton, useAuth, useUser } from "@clerk/nextjs";
 import { api } from "../../../convex/_generated/api";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 const options = [
   {
@@ -31,17 +28,7 @@ const options = [
     name: "Shop",
     redirect: "/",
   },
-  {
-    name: "Leave",
-    redirect: false,
-  },
 ];
-
-import restore1 from "../../../public/restore1.jpg";
-import restore2 from "../../../public/restore2.jpg";
-import reroll from "../../../public/reroll.jpg";
-import special from "../../../public/special.jpg";
-import Image from "next/image";
 
 const itemImages: { [key: string]: any } = {
   restore1: restore1,
@@ -58,50 +45,31 @@ const ItemDescriptions: { [key: string]: string } = {
 };
 
 export default function Game() {
-  const [leavePage, setLeavePage] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
   const [showItems, setShowItems] = useState(false);
-  const playerName = localStorage.getItem("characterName");
-  const playerPassword = localStorage.getItem("characterPassword");
-
-  const player = useQuery(api.players.getPlayer, {
-    playerName: playerName ?? "",
-    password: playerPassword ?? "",
-  });
-
-  const playerLevel = player?.level ?? 1;
-  const nextPlayerLevel: number = playerLevel + 1;
-
-  const levelStats = useQuery(api.player_stats.getLevelStats, {
-    level: playerLevel,
-  });
-
-  const nextLevelStats = useQuery(api.player_stats.getLevelStats, {
-    level: nextPlayerLevel,
-  });
-
-  useEffect(() => {
-    if (player && nextLevelStats) {
-      setProgressValue(
-        (player.current_exp / nextLevelStats.required_exp) * 100
-      );
-    }
-  }, [player, nextLevelStats]);
-
-  // Error handling after all Hooks
-  if (!playerName) {
-    return <p>No character found. Please create or login with a character.</p>;
-  }
+  const player = useQuery(api.players.getPlayer);
+  const levelStats = useQuery(
+    api.player_stats.getLevelStats,
+    player ? { level: player.level } : "skip"
+  );
+  const nextLevelStats = useQuery(
+    api.player_stats.getLevelStats,
+    player ? { level: player.level + 1 } : "skip"
+  );
 
   if (!player || !levelStats || !nextLevelStats) {
-    return <p>Loading...</p>;
+    return (
+      <div className="flex h-screen justify-center items-center">
+        <LoadingSpinner className="size-72"></LoadingSpinner>
+      </div>
+    );
   }
 
   return (
     <div className="container mx-auto h-screen flex flex-row justify-evenly items-center">
       <div className="flex flex-row gap-4">
         <div className="flex flex-col gap-4 justify-center items-center border rounded-lg p-4">
-          <h2 className="text-3xl">{player.player_name}</h2>
+          <h2 className="text-3xl">{player.playerName}</h2>
           <Skeleton className="w-16 h-16 rounded-lg"></Skeleton>
           <p className="text-2xl">
             Lvl: <span className="font-bold text-blue-500">{player.level}</span>
@@ -134,6 +102,11 @@ export default function Game() {
           >
             <p>Items</p>
           </Button>
+          <Authenticated>
+            <div className="border p-4">
+              <SignOutButton redirectUrl="/login" />
+            </div>
+          </Authenticated>
         </div>
         <div className="flex flex-col justify-center items-center gap-4">
           <div
@@ -178,45 +151,13 @@ export default function Game() {
               variant={"ghost"}
               asChild
               onClick={() => {
-                typeof el.redirect == "string"
-                  ? redirect(el.redirect)
-                  : setLeavePage(true);
+                redirect(el.redirect);
               }}
             >
               <div>{el.name}</div>
             </Button>
           ))}
         </div>
-      </div>
-
-      <div>
-        <AlertDialog open={leavePage}>
-          <AlertDialogContent className="">
-            <AlertDialogHeader className="flex justify-center items-center">
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                After pressing confirm button you will leave the page.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setLeavePage(false)}>
-                Cancel
-              </AlertDialogCancel>
-
-              <AlertDialogAction asChild>
-                <Button
-                  onClick={() => {
-                    setLeavePage(false);
-                    redirect("/");
-                  }}
-                >
-                  Confirm
-                </Button>
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
     </div>
   );

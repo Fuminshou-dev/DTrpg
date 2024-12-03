@@ -1,25 +1,31 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { handleClientScriptLoad } from "next/script";
 
 export const createPlayer = mutation({
-  args: { player_name: v.string(), password: v.string() },
+  args: { playerName: v.string() },
   handler: async (ctx, args) => {
-    const existing = await ctx.db
-      .query("players")
-      .filter((q) => q.eq(q.field("player_name"), args.player_name))
-      .first();
-    if (existing) {
-      throw new Error("Character name already taken", {
-        cause: "character already exists",
-      });
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
     }
-    const characterId = await ctx.db.insert("players", {
-      player_name: args.player_name,
-      password: args.password,
+    const userId = identity.subject;
+
+    const existingPlayer = await ctx.db
+      .query("players")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (existingPlayer) {
+      return existingPlayer;
+    }
+
+    const player = await ctx.db.insert("players", {
+      userId: userId,
+      playerName: args.playerName,
       gold: 0,
       current_exp: 0,
       img: "",
+      level: 1,
       items: [
         {
           amount: 0,
@@ -38,24 +44,23 @@ export const createPlayer = mutation({
           type: "special",
         },
       ],
-      level: 1,
     });
 
-    return characterId;
+    return player;
   },
 });
 
 export const getPlayer = query({
-  args: { password: v.string(), playerName: v.string() },
-  handler: async (ctx, args) => {
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return;
+    }
+    const userId = identity.subject;
     const player = await ctx.db
       .query("players")
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("player_name"), args.playerName),
-          q.eq(q.field("password"), args.password)
-        )
-      )
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
 
     if (!player) {

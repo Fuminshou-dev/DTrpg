@@ -9,18 +9,31 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [isAdult, setIsAdult] = useState(false); // TODO: change to false and figure out a way to not show dialog everytime
   const [isExplainRules, setExplainRules] = useState(false);
+  const { isSignedIn } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isSignedIn) {
+      setIsAdult(false);
+    }
+    if (isSignedIn) {
+      setIsAdult(true);
+    }
+  }, [isSignedIn]);
+
   return (
-    <div className="h-screen">
+    <div className="h-screen container mx-auto">
+      <div className="flex justify-end items-end p-4 m-4 border w-fit"></div>
       <div>
         <AlertDialog open={!isAdult}>
           <AlertDialogContent>
@@ -52,9 +65,9 @@ export default function Home() {
             : "blur h-screen flex flex-col justify-center items-center gap-8"
         }
       >
-        <div className="flex flex-col gap-8 max-w-96 justify-center items-center text-center">
-          <h1>DP RPG GAME</h1>
-          <h2>
+        <div className="flex flex-col gap-8 justify-center items-center text-center">
+          <h1 className="text-5xl">DP RPG GAME</h1>
+          <h2 className="text-2xl">
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Alias rerum
             sequi suscipit quia soluta facilis fuga laboriosam voluptates in
             maiores facere vel omnis laborum ad vero, impedit dicta rem dolorum,
@@ -88,7 +101,7 @@ export default function Home() {
               <AlertDialogAction
                 onClick={() => {
                   setExplainRules(false);
-                  redirect("/create");
+                  router.push("/main");
                 }}
               >
                 Got it, let's go.

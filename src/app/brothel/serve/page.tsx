@@ -12,16 +12,11 @@ export default function ServePage() {
   const updateGold = useMutation(api.customer_tasks.completedBrothelTask);
   const customer = useQuery(api.customers.getRandomCustomer);
   const task = useQuery(api.customer_tasks.getRandomTask);
-  const playerName = localStorage.getItem("characterName");
-
-  if (!playerName) {
-    return "No character";
-  }
 
   if (!customer || !task) {
     return (
       <div className="container mx-auto flex flex-col h-screen justify-center items-center">
-        <LoadingSpinner className="size-24" />
+        <LoadingSpinner className="size-72" />
       </div>
     );
   }
@@ -71,7 +66,7 @@ export default function ServePage() {
             <Button
               variant={"default"}
               onClick={() => {
-                updateGold({ player_name: playerName, money: earnedGold });
+                updateGold({ money: earnedGold });
                 redirect("/brothel");
               }}
             >

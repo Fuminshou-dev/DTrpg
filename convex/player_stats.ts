@@ -6,7 +6,7 @@ export const getLevelStats = query({
   handler: async (ctx, args) => {
     const levelStats = ctx.db
       .query("player_stats")
-      .filter((q) => q.eq(q.field("level"), args.level))
+      .withIndex("by_level", (q) => q.eq("level", args.level))
       .first();
     return levelStats;
   },

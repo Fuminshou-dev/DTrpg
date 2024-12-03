@@ -1,63 +1,41 @@
 "use client";
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { redirect } from "next/navigation";
-import { useQuery } from "convex/react";
+
+import { SignInButton, SignUpButton, useUser } from "@clerk/nextjs";
+import { Unauthenticated, useMutation } from "convex/react";
+import { useRouter } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 
 export default function LoginPage() {
-  const [characterName, setCharacterName] = useState("");
-  const [characterPassword, setCharacterPassword] = useState("");
-  const [isError, setIsError] = useState(false);
-  const player = useQuery(api.players.getPlayer, {
-    playerName: characterName ?? "",
-    password: characterPassword ?? "",
-  });
-  const handleLogin = () => {
-    if (player) {
-      localStorage.setItem("characterName", characterName);
-      localStorage.setItem("characterPassword", characterPassword);
-      redirect("/confirm-character");
-    } else {
-      setIsError(true);
+  const router = useRouter();
+  const { isSignedIn, user } = useUser();
+  const createPlayer = useMutation(api.players.createPlayer);
+
+  if (isSignedIn || user) {
+    const playerName = user.username;
+    if (!playerName) {
+      throw new Error("no playername");
     }
-  };
+    const player = createPlayer({ playerName });
+    router.push("/main");
+  }
+
+  // Show login/signup buttons if not signed in
   return (
     <div className="flex h-screen justify-center items-center">
-      <div className="flex flex-col gap-4 w-1/2 justify-center items-center">
-        <div>
-          <p>Name of your character</p>
-          <Input
-            value={characterName}
-            onChange={(e) => {
-              setCharacterName(e.target.value);
-            }}
-          />
+      <Unauthenticated>
+        <div className="flex gap-4">
+          <SignInButton forceRedirectUrl={"/main"} mode="modal">
+            <button className="px-4 py-2 bg-blue-500 text-white rounded">
+              Sign In
+            </button>
+          </SignInButton>
+          <SignUpButton forceRedirectUrl={"/main"} mode="modal">
+            <button className="px-4 py-2 bg-green-500 text-white rounded">
+              Sign Up
+            </button>
+          </SignUpButton>
         </div>
-        <div>
-          <p>Password for your character</p>
-          <Input
-            value={characterPassword}
-            onChange={(e) => {
-              setCharacterPassword(e.target.value);
-            }}
-          />
-        </div>
-        <Button onClick={handleLogin}>Login</Button>
-        {isError ? <p className="text-red-500">Character wasn't found</p> : ""}
-
-        <div className="flex flex-col w-1/2 justify-center items-center">
-          <h1>Don't have a character?</h1>
-          <Button
-            onClick={() => {
-              redirect("/create");
-            }}
-          >
-            Create
-          </Button>
-        </div>
-      </div>
+      </Unauthenticated>
     </div>
   );
 }

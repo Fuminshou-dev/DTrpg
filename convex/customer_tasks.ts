@@ -20,11 +20,16 @@ export const getRandomTask = query({
 });
 
 export const completedBrothelTask = mutation({
-  args: { player_name: v.string(), money: v.float64() }, // TODO: look for a specific player
+  args: { money: v.number() },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthorized");
+    }
+    const userId = identity.subject;
     const player = await ctx.db
       .query("players")
-      .filter((q) => q.eq(q.field("player_name"), args.player_name))
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
     if (!player) {
       return "No such player";
@@ -32,6 +37,6 @@ export const completedBrothelTask = mutation({
     const currentGold = player.gold;
     const newGold = currentGold + args.money;
     await ctx.db.patch(player._id, { gold: newGold });
-    return player!.gold;
+    return player.gold;
   },
 });
