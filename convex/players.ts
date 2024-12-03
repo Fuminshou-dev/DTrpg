@@ -59,7 +59,7 @@ export const getPlayer = query({
       .first();
 
     if (!player) {
-      throw new Error("No such player found.");
+      return null;
     }
     return player;
   },
