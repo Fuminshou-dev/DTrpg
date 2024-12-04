@@ -20,16 +20,24 @@ const itemImages: { [key: string]: any } = {
 };
 
 export default function ShopPage() {
-  const [showError, setShowError] = useState(false);
+  const [errorItemType, setErrorItemType] = useState<string | null>(null);
+  const [successItemType, setSuccessItemType] = useState<string | null>(null);
+
   const items = useQuery(api.shop.getAllShopItems);
   const router = useRouter();
   const player = useQuery(api.players.getPlayer);
   const buyItem = useMutation(api.shop.buyItem);
-  const handleItemBuy = async (itemPrice: number, itemType: string) => {
-    try {
-      await buyItem({ type: itemType, price: itemPrice });
-    } catch (error) {
-      setShowError(true);
+  const handleItemBuy = async (price: number, type: string) => {
+    const result = await buyItem({ price, type });
+
+    if (!result.success) {
+      if (result.error === "Not enough money") setErrorItemType(type);
+    } else {
+      setErrorItemType(null);
+    }
+
+    if (result.success) {
+      setSuccessItemType(type);
     }
   };
 
@@ -42,8 +50,8 @@ export default function ShopPage() {
   }
 
   return (
-    <div className="container mx-auto h-screen items-center justify-center flex">
-      <div className="flex flex-col  gap-24 items-center w-3/4 h-3/4">
+    <div className="container mx-auto h-screen py-12 justify-center flex">
+      <div className="flex flex-col  gap-12 items-center w-3/4 h-3/4">
         <Button
           className="flex p-4 text-lg"
           variant={"outline"}
@@ -53,7 +61,7 @@ export default function ShopPage() {
         >
           Go back
         </Button>
-        <div className="grid grid-cols-2 flex-1 w-full gap-12">
+        <div className="grid grid-cols-2 flex-1 w-full gap-12 p-4">
           {items?.map((item) => (
             <div
               key={item._id}
@@ -70,36 +78,42 @@ export default function ShopPage() {
               <p className="text-xl">
                 Cost: <span className="text-yellow-400">{item.price}</span> Gold
               </p>
-              {player.gold < item.price ? (
-                <div className="flex flex-col justify-center items-center gap-2">
-                  <Button
-                    onClick={() => handleItemBuy(item.price, item.type)}
-                    variant={"destructive"}
-                  >
-                    Buy
-                  </Button>
-                  {showError ? (
-                    <p className="text-red-500">Not enough gold</p>
+              <p>
+                You have{" "}
+                {player.items.map((el) =>
+                  el.type === item.type ? (
+                    el.amount === 0 ? (
+                      <span key={el.type} className="text-red-500">
+                        {el.amount}
+                      </span>
+                    ) : (
+                      <span key={el.type} className="text-green-500">
+                        {el.amount}
+                      </span>
+                    )
                   ) : (
                     ""
-                  )}
-                </div>
-              ) : (
-                <div className="flex flex-col justify-center items-center gap-2">
-                  <Button
-                    onClick={() => handleItemBuy(item.price, item.type)}
-                    variant={"secondary"}
-                    className="bg-green-600"
-                  >
-                    Buy
-                  </Button>
-                  {showError ? (
-                    <p className="text-red-500">Not enough gold</p>
-                  ) : (
-                    ""
-                  )}
-                </div>
-              )}
+                  )
+                )}{" "}
+                of this item
+              </p>
+              <div className="flex flex-col justify-center items-center gap-2">
+                <Button
+                  onClick={() => handleItemBuy(item.price, item.type)}
+                  variant={
+                    player.gold < item.price ? "destructive" : "secondary"
+                  }
+                  className={player.gold >= item.price ? "bg-green-600" : ""}
+                >
+                  Buy
+                </Button>
+                {errorItemType === item.type && (
+                  <p className="text-red-500">Not enough gold</p>
+                )}
+                {successItemType === item.type && (
+                  <p className="text-green-500">Successfully bought an item</p>
+                )}
+              </div>
             </div>
           ))}
         </div>

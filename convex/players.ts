@@ -30,20 +30,25 @@ export const createPlayer = mutation({
         {
           amount: 0,
           type: "reroll",
+          itemName: "Reroll Potion",
         },
         {
           amount: 0,
           type: "restore1",
+          itemName: "Healing Potion",
         },
         {
           amount: 0,
           type: "restore2",
+          itemName: "Healing Hi-Potion",
         },
         {
           amount: 0,
           type: "special",
+          itemName: "Special Potion",
         },
       ],
+      currentMonster: 0,
     });
 
     return player;

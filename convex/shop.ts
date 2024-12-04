@@ -1,25 +1,13 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { use } from "react";
+import { Doc } from "./_generated/dataModel";
 
-const Playertype = {
-  userId: v.string(),
-  playerName: v.string(),
-  level: v.float64(),
-  current_exp: v.float64(),
-  gold: v.float64(),
-  img: v.string(),
-  items: v.array(
-    v.object({
-      amount: v.number(),
-      type: v.union(
-        v.literal("restore1"),
-        v.literal("restore2"),
-        v.literal("special"),
-        v.literal("reroll")
-      ),
-    })
-  ),
+type Player = Doc<"players">;
+
+type BuyItemResponse = {
+  success: boolean;
+  error?: string;
+  player?: Player;
 };
 
 export const getAllShopItems = query({
@@ -35,7 +23,7 @@ export const buyItem = mutation({
     price: v.number(),
     type: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<BuyItemResponse> => {
     const identity = await ctx.auth.getUserIdentity();
     const userId = identity?.subject;
     if (!userId) {
@@ -46,12 +34,12 @@ export const buyItem = mutation({
       .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
     if (!player) {
-      throw new Error("player was not found");
+      return { success: false, error: "Player not found" };
     }
     const itemPrice = args.price;
 
     if (player.gold < itemPrice) {
-      throw new Error("Not enough money");
+      return { success: false, error: "Not enough money" };
     }
 
     const currentItems = player.items;
@@ -63,6 +51,11 @@ export const buyItem = mutation({
       items: updatedItems,
       gold: player.gold - itemPrice,
     });
-    return updatedPlayer;
+
+    const finalPlayer = await ctx.db.get(player._id);
+    if (!finalPlayer) {
+      return { success: false, error: "Failed to update player" };
+    }
+    return { success: true, player: finalPlayer };
   },
 });

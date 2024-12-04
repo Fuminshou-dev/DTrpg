@@ -30,6 +30,8 @@ const options = [
   },
 ];
 
+const itemOrder = ["restore1", "restore2", "reroll", "special"];
+
 const itemImages: { [key: string]: any } = {
   restore1: restore1,
   restore2: restore2,
@@ -70,6 +72,11 @@ export default function Game() {
     <div className="container mx-auto h-screen flex flex-row justify-evenly items-center">
       <div className="flex flex-row gap-4">
         <div className="flex flex-col gap-4 justify-center items-center border rounded-lg p-4">
+          <Authenticated>
+            <div className="border p-4">
+              <SignOutButton redirectUrl="/login" />
+            </div>
+          </Authenticated>
           <h2 className="text-3xl">{player.playerName}</h2>
           <Skeleton className="w-16 h-16 rounded-lg"></Skeleton>
           <p className="text-2xl">
@@ -103,11 +110,6 @@ export default function Game() {
           >
             <p>Items</p>
           </Button>
-          <Authenticated>
-            <div className="border p-4">
-              <SignOutButton redirectUrl="/login" />
-            </div>
-          </Authenticated>
         </div>
         <div className="flex flex-col justify-center items-center gap-4">
           <div
@@ -117,31 +119,39 @@ export default function Game() {
                 : "hidden"
             }
           >
-            {player.items.map((item) => (
-              <div
-                key={item.type}
-                className="flex flex-col border justify-center items-center rounded-lg p-8 gap-4"
-              >
-                <Image
-                  src={itemImages[item.type]}
-                  alt={item.type}
-                  width={80}
-                  height={40}
-                />
-                <div className="text-sm h-8">{ItemDescriptions[item.type]}</div>
-                <div className="text-2xl">
-                  You have:{" "}
-                  <span
-                    className={
-                      item.amount === 0 ? "text-red-500" : "text-green-500"
-                    }
-                  >
-                    {item.amount}
-                  </span>{" "}
-                  of this item
+            {itemOrder
+              .map(
+                (orderType) =>
+                  player.items.find((item) => item.type === orderType)!
+              )
+              .map((item) => (
+                <div
+                  key={item.type}
+                  className="flex flex-col border justify-center items-center rounded-lg p-4 max-w-lg gap-4"
+                >
+                  <h1 className="text-3xl">{item.itemName}</h1>
+                  <Image
+                    src={itemImages[item.type]}
+                    alt={item.type}
+                    width={60}
+                  />
+                  <div className="text-lg h-8">
+                    {ItemDescriptions[item.type]}
+                  </div>
+                  <div className="text-2xl">
+                    You have:{" "}
+                    <span
+                      className={
+                        item.amount === 0 ? "text-red-500" : "text-green-500"
+                      }
+                    >
+                      {item.amount}
+                    </span>{" "}
+                    of this item
+                  </div>
+                  <Button>Use</Button>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
         <div className="grid grid-cols-2 gap-8">
