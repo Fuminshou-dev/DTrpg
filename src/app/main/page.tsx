@@ -26,7 +26,7 @@ const options = [
   },
   {
     name: "Shop",
-    redirect: "/",
+    redirect: "/shop",
   },
 ];
 
@@ -47,6 +47,7 @@ const ItemDescriptions: { [key: string]: string } = {
 export default function Game() {
   const [progressValue, setProgressValue] = useState(0);
   const [showItems, setShowItems] = useState(false);
+  const router = useRouter();
   const player = useQuery(api.players.getPlayer);
   const levelStats = useQuery(
     api.player_stats.getLevelStats,
@@ -151,7 +152,7 @@ export default function Game() {
               variant={"ghost"}
               asChild
               onClick={() => {
-                redirect(el.redirect);
+                router.push(el.redirect);
               }}
             >
               <div>{el.name}</div>

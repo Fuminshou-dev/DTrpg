@@ -6,7 +6,6 @@ type Item = {
   type: "restore1" | "restore2" | "special" | "reroll";
 };
 
-type Items = [Item, Item, Item, Item];
 export default defineSchema({
   brothel_customers: defineTable({
     price: v.float64(),
