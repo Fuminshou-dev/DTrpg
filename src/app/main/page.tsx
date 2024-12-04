@@ -59,6 +59,14 @@ export default function Game() {
     player ? { level: player.level + 1 } : "skip"
   );
 
+  useEffect(() => {
+    if (!player || !nextLevelStats) return;
+    const required_exp = nextLevelStats.required_exp;
+    const current_exp = player.current_exp;
+    const progressPercentage = (current_exp / required_exp) * 100;
+    setProgressValue(progressPercentage);
+  }, [player, nextLevelStats]);
+
   if (!player || !levelStats || !nextLevelStats) {
     return (
       <div className="flex h-screen justify-center items-center">
@@ -100,7 +108,7 @@ export default function Game() {
               {nextLevelStats.required_exp - player.current_exp}
             </span>
           </p>
-          <Progress value={progressValue} className="" />
+          <Progress value={progressValue} />
           <Button
             asChild
             onClick={() => {
@@ -153,7 +161,7 @@ export default function Game() {
               ))}
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-8">
+        <div className="grid grid-cols-2 gap-4 justify-center items-center">
           {options.map((el) => (
             <Button
               key={el.name}

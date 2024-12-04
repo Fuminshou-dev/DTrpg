@@ -78,7 +78,7 @@ export default function ShopPage() {
               <p className="text-xl">
                 Cost: <span className="text-yellow-400">{item.price}</span> Gold
               </p>
-              <p>
+              <p className="text-xl">
                 You have{" "}
                 {player.items.map((el) =>
                   el.type === item.type ? (
@@ -99,11 +99,16 @@ export default function ShopPage() {
               </p>
               <div className="flex flex-col justify-center items-center gap-2">
                 <Button
+                  disabled={player.gold < item.price ? true : false}
                   onClick={() => handleItemBuy(item.price, item.type)}
                   variant={
                     player.gold < item.price ? "destructive" : "secondary"
                   }
-                  className={player.gold >= item.price ? "bg-green-600" : ""}
+                  className={
+                    player.gold < item.price
+                      ? "w-24 h-12 disabled:cursor-not-allowed"
+                      : "w-24 h-12 bg-green-600"
+                  }
                 >
                   Buy
                 </Button>
