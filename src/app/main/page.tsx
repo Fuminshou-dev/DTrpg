@@ -14,11 +14,10 @@ import Image from "next/image";
 import { SignOutButton, useAuth, useUser } from "@clerk/nextjs";
 import { api } from "../../../convex/_generated/api";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-
 const options = [
   {
     name: "Fight",
-    redirect: "/",
+    redirect: "/fight",
   },
   {
     name: "Brothel",

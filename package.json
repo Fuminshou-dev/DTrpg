@@ -13,6 +13,7 @@
     "@clerk/themes": "^2.1.49",
     "@dotenvx/dotenvx": "^1.26.2",
     "@radix-ui/react-alert-dialog": "^1.1.2",
+    "@radix-ui/react-popover": "^1.1.2",
     "@radix-ui/react-progress": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "class-variance-authority": "^0.7.1",
