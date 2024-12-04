@@ -1,7 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const isPublicRoute = createRouteMatcher(["/login(.*)"]);
+const isPublicRoute = createRouteMatcher(["/login(.*)", "/"]);
 
 const VALID_MONSTER_IDS = [0, 1, 2, 3, 4, 5, 6]; // Keep it simple for middleware
 

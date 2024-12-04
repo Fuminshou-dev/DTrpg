@@ -15,7 +15,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider
       publishableKey={publishableKey}
-      appearance={{ baseTheme: dark }}
+      appearance={{
+        baseTheme: dark,
+        elements: {
+          footer: "hidden",
+        },
+      }}
     >
       <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
         <ThemeProvider
