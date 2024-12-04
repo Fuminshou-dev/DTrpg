@@ -108,7 +108,7 @@ export default function Game() {
               {nextLevelStats.required_exp - player.current_exp}
             </span>
           </p>
-          <Progress value={progressValue} />
+          <Progress indicatorcolor="" value={progressValue} />
           <Button
             asChild
             onClick={() => {

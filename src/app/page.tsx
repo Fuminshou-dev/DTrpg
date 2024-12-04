@@ -17,7 +17,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const [isAdult, setIsAdult] = useState(false); // TODO: change to false and figure out a way to not show dialog everytime
+  const [isAdult, setIsAdult] = useState(true);
   const [isExplainRules, setExplainRules] = useState(false);
   const { isSignedIn } = useAuth();
   const router = useRouter();
@@ -35,7 +35,7 @@ export default function Home() {
     <div className="h-screen container mx-auto">
       <div className="flex justify-end items-end p-4 m-4 border w-fit"></div>
       <div>
-        <AlertDialog open={!isAdult}>
+        <AlertDialog defaultOpen={false} open={!isAdult}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Are 18+?</AlertDialogTitle>

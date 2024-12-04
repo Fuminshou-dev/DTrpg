@@ -11,10 +11,22 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function FightPage() {
-  const [selectedMonster, setSelectedMonster] = useState<string | null>(null);
   const router = useRouter();
+  const [selectedMonster, setSelectedMonster] = useState<string | null>(null);
+  const [monsterToConfirm, setMonsterToConfirm] = useState<number | null>(null); // Track which monster is being confirmed  const router = useRouter();
   const monsters = useQuery(api.monsters.getAllMonstersVisibleToPlayer);
   if (!monsters) {
     return (
@@ -33,7 +45,7 @@ export default function FightPage() {
   }
   return (
     <div className="flex flex-col h-screen items-center container mx-auto">
-      <Button className="p-4 text-sm m-8" onClick={() => router.back()}>
+      <Button className="p-4 text-sm m-8" onClick={() => router.push("/main")}>
         Go back
       </Button>
       <div className="flex flex-col gap-8 justify-center items-center">
@@ -87,7 +99,48 @@ export default function FightPage() {
                     </div>
                   </PopoverContent>
                 </Popover>
-                <Button variant={"destructive"}>Fight</Button>
+                <AlertDialog
+                  open={monsterToConfirm === monster.showId}
+                  onOpenChange={(open) => {
+                    setMonsterToConfirm(open ? monster.showId : null);
+                  }}
+                >
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant={"destructive"}
+                      onClick={() => setMonsterToConfirm(monster.showId)}
+                    >
+                      Fight
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you absolutely sure?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete your account and remove your data from our
+                        servers.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel
+                        onClick={() => setMonsterToConfirm(null)}
+                      >
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          router.push(`/fight/${monster.showId}`);
+                          setMonsterToConfirm(null);
+                        }}
+                      >
+                        Start Fight
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           ))}

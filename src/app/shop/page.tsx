@@ -56,7 +56,7 @@ export default function ShopPage() {
           className="flex p-4 text-lg"
           variant={"outline"}
           onClick={() => {
-            router.back();
+            router.push("/main");
           }}
         >
           Go back

@@ -21,6 +21,8 @@ export default defineSchema(
       exp: v.float64(),
       gold: v.float64(),
       hp: v.float64(),
+      showId: v.number(),
+
       max_dmg: v.float64(),
       min_dmg: v.float64(),
       monster_type: v.string(),
@@ -30,8 +32,7 @@ export default defineSchema(
           task_description: v.string(),
         })
       ),
-      showId: v.number(),
-    }).index("by_monster_type", ["monster_type"]),
+    }).index("by_monsterID", ["showId"]),
     player_stats: defineTable({
       atk: v.float64(),
       hp: v.float64(),
@@ -45,6 +46,7 @@ export default defineSchema(
       current_exp: v.float64(),
       gold: v.float64(),
       img: v.string(),
+      currentMonster: v.number(),
       items: v.array(
         v.object({
           amount: v.number(),
@@ -62,7 +64,6 @@ export default defineSchema(
           ),
         })
       ),
-      currentMonster: v.number(),
     }).index("by_userId", ["userId"]),
     shop_items: defineTable({
       amount: v.number(),
