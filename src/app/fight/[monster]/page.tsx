@@ -206,7 +206,11 @@ export default function MonsterFightPage() {
           <Button
             className="p-6 bg-green-500"
             onClick={() => {
-              setCurrentMonsterHP(1);
+              setCurrentMonsterHP(
+                !currentMonsterHP || !playerDmg
+                  ? 0
+                  : currentMonsterHP - playerDmg
+              );
             }}
           >
             Success
