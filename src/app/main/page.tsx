@@ -14,6 +14,9 @@ import Image from "next/image";
 import { SignOutButton, useAuth, useUser } from "@clerk/nextjs";
 import { api } from "../../../convex/_generated/api";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+
 const options = [
   {
     name: "Fight",
@@ -76,9 +79,14 @@ export default function Game() {
   }
 
   return (
-    <div className="container mx-auto h-screen flex flex-row justify-evenly items-center">
-      <div className="flex flex-row gap-4">
-        <div className="flex flex-col gap-4 justify-center items-center border rounded-lg p-4">
+    <div className="container mx-auto h-screen flex flex-row justify-center items-center">
+      <div className={cn("flex flex-row", showItems ? "gap-0" : "gap-4")}>
+        <motion.div
+          initial={{ x: 0 }}
+          animate={{ x: showItems ? -100 : 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="flex flex-col gap-4 justify-center items-center border rounded-lg p-8"
+        >
           <Authenticated>
             <div className="border p-4">
               <SignOutButton redirectUrl="/login" />
@@ -117,51 +125,70 @@ export default function Game() {
           >
             <p>Items</p>
           </Button>
-        </div>
-        <div className="flex flex-col justify-center items-center gap-4">
-          <div
-            className={
-              showItems
-                ? "grid grid-cols-2 gap-4 justify-center items-center"
-                : "hidden"
-            }
-          >
-            {itemOrder
-              .map(
-                (orderType) =>
-                  player.items.find((item) => item.type === orderType)!
-              )
-              .map((item) => (
-                <div
-                  key={item.type}
-                  className="flex flex-col border justify-center items-center rounded-lg p-4 max-w-lg gap-4"
-                >
-                  <h1 className="text-3xl">{item.itemName}</h1>
-                  <Image
-                    src={itemImages[item.type]}
-                    alt={item.type}
-                    width={60}
-                  />
-                  <div className="text-lg h-8">
-                    {ItemDescriptions[item.type]}
-                  </div>
-                  <div className="text-2xl">
-                    You have:{" "}
-                    <span
-                      className={
-                        item.amount === 0 ? "text-red-500" : "text-green-500"
-                      }
+        </motion.div>
+        <div className="flex flex-col justify-center items-center gap-2">
+          <AnimatePresence mode="wait">
+            {showItems && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.3, exit: { duration: 0.15 } }}
+                className="grid grid-cols-2 gap-4 justify-center items-center"
+              >
+                {itemOrder
+                  .map(
+                    (orderType) =>
+                      player.items.find((item) => item.type === orderType)!
+                  )
+                  .map((item, index) => (
+                    <motion.div
+                      key={item.type}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{
+                        duration: 0.15,
+                        delay: index * 0.1,
+                        exit: { duration: 0.15, delay: 0 },
+                      }}
+                      className="flex flex-col border justify-center items-center rounded-lg p-4 max-w-lg gap-4"
                     >
-                      {item.amount}
-                    </span>{" "}
-                    of this item
-                  </div>
-                  <Button>Use</Button>
-                </div>
-              ))}
-          </div>
+                      <h1 className="text-3xl">{item.itemName}</h1>
+                      <Image
+                        src={itemImages[item.type]}
+                        alt={item.type}
+                        width={60}
+                      />
+                      <div className="text-lg h-8">
+                        {ItemDescriptions[item.type]}
+                      </div>
+                      <div className="text-2xl">
+                        You have:{" "}
+                        <span
+                          className={
+                            item.amount === 0
+                              ? "text-red-500"
+                              : "text-green-500"
+                          }
+                        >
+                          {item.amount}
+                        </span>{" "}
+                        of this item
+                      </div>
+                      <Button>Use</Button>
+                    </motion.div>
+                  ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        <div className="grid grid-cols-2 gap-4 justify-center items-center">
+        <motion.div
+          initial={{ x: 0 }}
+          animate={{ x: showItems ? 100 : 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="grid grid-cols-1 gap-4 justify-center items-center"
+        >
           {options.map((el) => (
             <Button
               key={el.name}
@@ -175,7 +202,7 @@ export default function Game() {
               <div>{el.name}</div>
             </Button>
           ))}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

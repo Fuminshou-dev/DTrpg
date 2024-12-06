@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { Doc } from "./_generated/dataModel";
-import { query } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
 type Monster = Doc<"monsters">;
 

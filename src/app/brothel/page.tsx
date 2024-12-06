@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -12,12 +12,18 @@ export default function BrothelPage() {
   const [isLoading, setIsLoading] = useState(false);
   const customers = useQuery(api.customers.getAllCustomers);
   const allBrothelTasks = useQuery(api.customer_tasks.getCustomerTasks);
+
   useEffect(() => {
     if (!customers) {
       setIsLoading(true);
     } else {
       setIsLoading(false);
     }
+  }, [customers]);
+
+  const shuffledCustomers = useMemo(() => {
+    if (!customers) return [];
+    return [...customers].sort(() => Math.random() - 0.5);
   }, [customers]);
 
   return isLoading ? (
@@ -30,7 +36,7 @@ export default function BrothelPage() {
         <Button onClick={() => redirect("/main")}>Return to main menu</Button>
         <div className="flex flex-col items-center w-full gap-8">
           <div className={"grid grid-cols-3 gap-4"}>
-            {customers?.map((customer) => (
+            {shuffledCustomers?.map((customer) => (
               <div
                 className="flex justify-center items-center border rounded-lg size-72 "
                 key={customer._id}
