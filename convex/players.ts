@@ -1,5 +1,11 @@
 import { v } from "convex/values";
-import { internalMutation, mutation, query } from "./_generated/server";
+import {
+  action,
+  httpAction,
+  internalMutation,
+  mutation,
+  query,
+} from "./_generated/server";
 
 export const createPlayer = mutation({
   args: { playerName: v.string() },
@@ -26,6 +32,7 @@ export const createPlayer = mutation({
       current_exp: 0,
       img: "",
       level: 1,
+      fightStatus: "idle",
       items: [
         {
           amount: 0,
@@ -55,6 +62,22 @@ export const createPlayer = mutation({
   },
 });
 
+export const getPlayerById = query({
+  args: {
+    playerId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const player = await ctx.db
+      .query("players")
+      .withIndex("by_userId", (q) => q.eq("userId", args.playerId))
+      .first();
+
+    if (!player) {
+      return null;
+    }
+    return player;
+  },
+});
 export const getPlayer = query({
   args: {},
   handler: async (ctx) => {
@@ -74,8 +97,7 @@ export const getPlayer = query({
     return player;
   },
 });
-
-export const updatePlayer = mutation({
+export const updatePlayerAfterSuccesfullAttack = mutation({
   args: {
     monsterId: v.number(),
     earnedGold: v.number(),
@@ -104,6 +126,13 @@ export const updatePlayer = mutation({
       throw new Error("No stats found for this level");
     }
 
+    const nextLevelStats = await ctx.db
+      .query("player_stats")
+      .withIndex("by_level", (q) => q.eq("level", player.level + 1))
+      .first();
+    if (!nextLevelStats) {
+      throw new Error("No stats found for next level");
+    }
     const newPlayerExp = player.current_exp + args.earnedExp;
     const newPlayerGold = player.gold + args.earnedGold;
     const newPlayerMonster = args.monsterId + 1;
@@ -127,7 +156,7 @@ export const updatePlayer = mutation({
       });
     }
 
-    if (newPlayerExp > playerStats.required_exp) {
+    if (newPlayerExp > nextLevelStats.required_exp) {
       await ctx.db.patch(player._id, {
         level: player.level + 1,
         current_exp: newPlayerExp,
@@ -136,6 +165,7 @@ export const updatePlayer = mutation({
     await ctx.db.patch(player._id, {
       gold: newPlayerGold,
       current_exp: newPlayerExp,
+      fightStatus: "idle",
     });
 
     const newPlayer = await ctx.db
@@ -151,7 +181,7 @@ export const updatePlayer = mutation({
   },
 });
 
-export const resetPlayer = internalMutation({
+export const resetPlayer = mutation({
   args: {
     playerId: v.id("players"),
   },
@@ -161,6 +191,7 @@ export const resetPlayer = internalMutation({
       current_exp: 0,
       currentMonster: 0,
       level: 1,
+      fightStatus: "idle",
       items: [
         {
           amount: 0,
@@ -185,5 +216,72 @@ export const resetPlayer = internalMutation({
       ],
     });
     return "Successfully reset player";
+  },
+});
+
+export const updatePlayerFightStatus = mutation({
+  args: {
+    fightStatus: v.union(
+      v.literal("idle"),
+      v.object({
+        status: v.literal("fighting"),
+        monsterId: v.number(),
+        currentTask: v.object({
+          task_description: v.string(),
+          break_time: v.number(),
+        }),
+        playerAtk: v.number(),
+        monsterAtk: v.number(),
+        playerHp: v.number(),
+        monsterHp: v.number(),
+        atkMultiplier: v.number(),
+        finalDmg: v.number(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const indentity = await ctx.auth.getUserIdentity();
+    if (!indentity) {
+      throw new Error("Not authenticated");
+    }
+    const userId = indentity.subject;
+
+    const player = await ctx.db
+      .query("players")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!player) {
+      throw new Error("Player not found");
+    }
+
+    await ctx.db.patch(player._id, {
+      fightStatus: args.fightStatus,
+    });
+
+    const newPlayer = await ctx.db
+      .query("players")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!newPlayer) {
+      throw new Error("Player not found after update");
+    }
+
+    return newPlayer;
+  },
+});
+export const getPlayerFightStatus = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const player = await ctx.db
+      .query("players")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .first();
+
+    if (!player) {
+      return null;
+    }
+    return player.fightStatus;
   },
 });

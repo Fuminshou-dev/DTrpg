@@ -1,16 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { useQuery } from "convex/react";
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
-import { api } from "../../../convex/_generated/api";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,26 +11,53 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { useMutation, useQuery } from "convex/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import {
+  calculateFinalDmg,
+  calculateMonsterDmg,
+  getRandomAtkMultiplier,
+  getRandomTask,
+} from "./[monster]/page";
+import { api } from "../../../../convex/_generated/api";
 
 export default function FightPage() {
   const router = useRouter();
+  const updatePlayerFightStatus = useMutation(
+    api.players.updatePlayerFightStatus
+  );
   const [selectedMonster, setSelectedMonster] = useState<string | null>(null);
   const [monsterToConfirm, setMonsterToConfirm] = useState<number | null>(null); // Track which monster is being confirmed  const router = useRouter();
   const monsters = useQuery(api.monsters.getAllMonstersVisibleToPlayer);
-  if (!monsters) {
+  const player = useQuery(api.players.getPlayer);
+  const playerStats = useQuery(api.player_stats.getLevelStats, {
+    level: player?.level ?? 1,
+  });
+
+  const atkMultiplier = getRandomAtkMultiplier();
+  const monsterDmg = calculateMonsterDmg;
+  const finalDmg = calculateFinalDmg(playerStats?.atk ?? 0, atkMultiplier);
+
+  const randomTask = getRandomTask;
+
+  if (
+    !monsters ||
+    (!monsters.success && monsters.error === "No userId") ||
+    !player
+  ) {
     return (
       <div className="flex flex-col h-screen justify-center items-center">
         <LoadingSpinner className="size-72"></LoadingSpinner>
       </div>
     );
-  }
-  if (!monsters?.success) {
-    if (monsters.error === "No userId")
-      return (
-        <div className="flex flex-col h-screen justify-center items-center">
-          <LoadingSpinner className="size-72"></LoadingSpinner>
-        </div>
-      );
   }
   return (
     <div className="flex flex-col h-screen items-center container mx-auto">
@@ -142,6 +158,19 @@ export default function FightPage() {
                       </AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() => {
+                          updatePlayerFightStatus({
+                            fightStatus: {
+                              status: "fighting",
+                              atkMultiplier: atkMultiplier,
+                              currentTask: randomTask({ monster }),
+                              finalDmg: finalDmg,
+                              monsterAtk: monsterDmg({ monster }),
+                              monsterHp: monster.hp,
+                              monsterId: monster.showId,
+                              playerAtk: playerStats?.atk ?? 0,
+                              playerHp: playerStats?.hp ?? 0,
+                            },
+                          });
                           router.push(`/fight/${monster.showId}`);
                           setMonsterToConfirm(null);
                         }}

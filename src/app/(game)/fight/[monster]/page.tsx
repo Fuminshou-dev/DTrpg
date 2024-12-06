@@ -1,42 +1,45 @@
 "use client";
 
-import { useMutation, useQuery } from "convex/react";
-import React, { useEffect, useState } from "react";
-import { api } from "../../../../convex/_generated/api";
-import { useParams, useRouter } from "next/navigation";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { Doc } from "../../../../convex/_generated/dataModel";
-import { getLevelStats } from "../../../../convex/player_stats";
 import { ATK_MULTIPLIER } from "@/app/utils/constants";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogTitle,
-} from "@radix-ui/react-alert-dialog";
 import {
   AlertDialogContent,
   AlertDialogFooter,
   AlertDialogHeader,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Progress } from "@/components/ui/progress";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogTitle,
+} from "@radix-ui/react-alert-dialog";
+import { useMutation, useQuery } from "convex/react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Doc } from "../../../../../convex/_generated/dataModel";
+import { api } from "../../../../../convex/_generated/api";
 
-const getRandomTask = ({ monster }: { monster: Doc<"monsters"> }) => {
+export const getRandomTask = ({ monster }: { monster: Doc<"monsters"> }) => {
   const randomTask =
     monster.tasks[Math.floor(Math.random() * monster.tasks.length)];
   return randomTask;
 };
 
-const getRandomAtkMultiplier = () => {
+export const getRandomAtkMultiplier = () => {
   return ATK_MULTIPLIER[Math.floor(Math.random() * ATK_MULTIPLIER.length)];
 };
 
-const calculateFinalDmg = (playerAtk: number, atkMultiplier: number) => {
+export const calculateFinalDmg = (playerAtk: number, atkMultiplier: number) => {
   const finalDmg = Math.floor(playerAtk * atkMultiplier);
   return finalDmg;
 };
 
-const calculateMonsterDmg = ({ monster }: { monster: Doc<"monsters"> }) => {
+export const calculateMonsterDmg = ({
+  monster,
+}: {
+  monster: Doc<"monsters">;
+}) => {
   // get random number between monster.min_dmg and monster.max_dmg
   const monsterDmg = Math.floor(
     Math.random() * (monster.max_dmg - monster.min_dmg + 1) + monster.min_dmg
@@ -329,7 +332,13 @@ export default function MonsterFightPage() {
   const playerStats = useQuery(api.player_stats.getLevelStats, {
     level: player?.level ?? 1,
   });
-  const newPlayerStats = useMutation(api.players.updatePlayer);
+  const newPlayerStats = useMutation(
+    api.players.updatePlayerAfterSuccesfullAttack
+  );
+  const resetPlayer = useMutation(api.players.resetPlayer);
+  const updatePlayerFightStatus = useMutation(
+    api.players.updatePlayerFightStatus
+  );
   const [playerCurrentHp, setPlayerCurrentHp] = useState(0);
   const [playerAtk, setPlayerAtk] = useState(0);
   const [atkMultiplier, setAtkMultiplier] = useState(0);
@@ -339,25 +348,82 @@ export default function MonsterFightPage() {
     task_description: "",
   });
 
+  const updatePlayer = useMutation(
+    api.players.updatePlayerAfterSuccesfullAttack
+  );
+
+  // TODO: refactor this pages to /choose-monster and /fight to handle fightState from DB.
+
+  // useEffect(() => {
+  //   if (currentMonster && player && playerStats) {
+  //     if (
+  //       player.fightStatus &&
+  //       typeof player.fightStatus === "object" &&
+  //       player.fightStatus.status === "fighting"
+  //     ) {
+  //       // Player is already in a fight, set states from fightStatus
+  //       setMonsterCurrentHp(player.fightStatus.monsterHp);
+  //       setMonsterAtk(player.fightStatus.monsterAtk);
+  //       setPlayerCurrentHp(player.fightStatus.playerHp);
+  //       setPlayerAtk(player.fightStatus.playerAtk);
+  //       setAtkMultiplier(player.fightStatus.atkMultiplier);
+  //       setFinalDmg(player.fightStatus.finalDmg);
+  //       setCurrentTask(player.fightStatus.currentTask);
+  //     } else {
+  //       // Player is not in a fight, initialize new fight
+  //       const newMonsterAtk = calculateMonsterDmg({ monster: currentMonster });
+  //       const newAtkMultiplier = getRandomAtkMultiplier();
+  //       const newFinalDmg = calculateFinalDmg(
+  //         playerStats.atk,
+  //         newAtkMultiplier
+  //       );
+  //       const randomTask = getRandomTask({ monster: currentMonster });
+
+  //       setMonsterCurrentHp(currentMonster.hp);
+  //       setMonsterAtk(newMonsterAtk);
+  //       setPlayerCurrentHp(playerStats.hp);
+  //       setPlayerAtk(playerStats.atk);
+  //       setAtkMultiplier(newAtkMultiplier);
+  //       setFinalDmg(newFinalDmg);
+  //       setCurrentTask(randomTask);
+
+  //       // Update player's fight status
+  //       updatePlayerFightStatus({
+  //         fightStatus: {
+  //           status: "fighting",
+  //           monsterId: currentMonster.showId,
+  //           atkMultiplier: newAtkMultiplier,
+  //           currentTask: randomTask,
+  //           monsterHp: currentMonster.hp,
+  //           playerHp: playerStats.hp,
+  //           playerAtk: playerStats.atk,
+  //           finalDmg: newFinalDmg,
+  //           monsterAtk: newMonsterAtk,
+  //         },
+  //       });
+  //     }
+  //   }
+  // }, [currentMonster, player, playerStats]);
+
   useEffect(() => {
     if (!currentMonster || !playerStats || !player) return;
+    // if (player?.currentMonster! < monsterId) {
+    //   router.push("/login");
+    // }
 
-    if (player?.currentMonster < monsterId) {
-      alert("you can't fight this monster yet");
-      router.push("/fight");
-      return;
+    if (player?.currentMonster >= monsterId) {
+      setMonsterCurrentHp(currentMonster.hp);
+      const monsterAtk = calculateMonsterDmg({ monster: currentMonster });
+      setMonsterAtk(monsterAtk);
+      setPlayerCurrentHp(playerStats.hp);
+      setPlayerAtk(playerStats.atk);
+      const newAtkMultiplier = getRandomAtkMultiplier();
+      setAtkMultiplier(newAtkMultiplier);
+      setFinalDmg(calculateFinalDmg(playerStats.atk, newAtkMultiplier));
+      const randomTask = getRandomTask({ monster: currentMonster });
+      setCurrentTask(randomTask);
     }
-    setMonsterCurrentHp(currentMonster.hp);
-    const monsterAtk = calculateMonsterDmg({ monster: currentMonster });
-    setMonsterAtk(monsterAtk);
-    setPlayerCurrentHp(playerStats.hp);
-    setPlayerAtk(playerStats.atk);
-    const newAtkMultiplier = getRandomAtkMultiplier();
-    setAtkMultiplier(newAtkMultiplier);
-    setFinalDmg(calculateFinalDmg(playerStats.atk, newAtkMultiplier));
-    const randomTask = getRandomTask({ monster: currentMonster });
-    setCurrentTask(randomTask);
-  }, [currentMonster, playerStats, player]);
+  }, [currentMonster, playerStats, player, monsterId, router]);
 
   if (!currentMonster || !player || !playerStats) {
     return (
@@ -366,7 +432,6 @@ export default function MonsterFightPage() {
       </div>
     );
   }
-
   // Attack functions
   const handleShowAtkDialog = () => {
     setShowAttackDialog(true);
@@ -375,9 +440,11 @@ export default function MonsterFightPage() {
   const handleAttack = async () => {
     const newMonsterHp = monsterCurrentHp - finalDmg;
     setMonsterCurrentHp(newMonsterHp);
+
+    //win logic
     if (newMonsterHp <= 0) {
       const newPlayer = await newPlayerStats({
-        earnedExp: currentMonster.exp + 40,
+        earnedExp: currentMonster.exp,
         earnedGold: currentMonster.gold,
         monsterId: currentMonster.showId,
       });
@@ -389,9 +456,15 @@ export default function MonsterFightPage() {
 
     const newPlayerHp = playerCurrentHp - monsterAtk;
     setPlayerCurrentHp(newPlayerHp);
+
+    //loss logic
     if (newPlayerHp <= 0) {
       alert("You've been defeated!");
-      // TODO: handle death logic
+      // TODO: show alert dialog when we reset the playe.r
+      resetPlayer({
+        playerId: player._id,
+      });
+      router.push("/main");
     }
 
     const newMonsterAtk = calculateMonsterDmg({ monster: currentMonster });

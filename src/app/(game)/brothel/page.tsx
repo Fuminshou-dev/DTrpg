@@ -1,12 +1,12 @@
 "use client";
 
-import { useQuery } from "convex/react";
-import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useQuery } from "convex/react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { api } from "../../../convex/_generated/api";
+import { useEffect, useMemo, useState } from "react";
+import { api } from "../../../../convex/_generated/api";
 
 export default function BrothelPage() {
   const [isLoading, setIsLoading] = useState(false);

@@ -1,22 +1,21 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { redirect, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { Authenticated, useQuery } from "convex/react";
-import restore1 from "../../../public/restore1.jpg";
-import restore2 from "../../../public/restore2.jpg";
-import reroll from "../../../public/reroll.jpg";
-import special from "../../../public/special.jpg";
-import Image from "next/image";
-import { SignOutButton, useAuth, useUser } from "@clerk/nextjs";
-import { api } from "../../../convex/_generated/api";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import next from "next";
+import { SignOutButton } from "@clerk/nextjs";
+import { Authenticated, useQuery } from "convex/react";
+import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import reroll from "../../../../public/reroll.jpg";
+import restore1 from "../../../../public/restore1.jpg";
+import restore2 from "../../../../public/restore2.jpg";
+import special from "../../../../public/special.jpg";
+import { api } from "../../../../convex/_generated/api";
 
 const options = [
   {

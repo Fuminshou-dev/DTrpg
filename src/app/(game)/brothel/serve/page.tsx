@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { useMutation, useQuery } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
 import Link from "next/link";
 import { useState } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -17,6 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
 } from "@/components/ui/alert-dialog";
+import { api } from "../../../../../convex/_generated/api";
 
 export default function ServePage() {
   const updateGold = useMutation(api.customer_tasks.completedBrothelTask);

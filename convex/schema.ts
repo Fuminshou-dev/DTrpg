@@ -1,3 +1,4 @@
+import { fail } from "assert";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
@@ -47,6 +48,23 @@ export default defineSchema(
       gold: v.float64(),
       img: v.string(),
       currentMonster: v.number(),
+      fightStatus: v.union(
+        v.literal("idle"),
+        v.object({
+          monsterId: v.number(),
+          currentTask: v.object({
+            task_description: v.string(),
+            break_time: v.number(),
+          }),
+          status: v.literal("fighting"),
+          playerAtk: v.number(),
+          monsterAtk: v.number(),
+          playerHp: v.number(),
+          monsterHp: v.number(),
+          atkMultiplier: v.number(),
+          finalDmg: v.number(),
+        })
+      ),
       items: v.array(
         v.object({
           amount: v.number(),
