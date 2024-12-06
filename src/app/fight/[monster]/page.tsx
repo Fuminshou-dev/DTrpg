@@ -1,9 +1,9 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import React, { useEffect, useState } from "react";
 import { api } from "../../../../convex/_generated/api";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,6 @@ const getRandomAtkMultiplier = () => {
 };
 
 const calculateFinalDmg = (playerAtk: number, atkMultiplier: number) => {
-  debugger;
   const finalDmg = Math.floor(playerAtk * atkMultiplier);
   return finalDmg;
 };
@@ -136,8 +135,22 @@ function PlayerSection({
       </div>
       <div className="flex flex-col justify-center items-center border p-4 w-full m-5">
         <div>Player attack: {playerAtk}</div>
-        <div>Attack multiplier: {atkMultiplier}</div>
-        <div>Final damage: {finalDmg}</div>
+        <div>
+          Attack multiplier:{" "}
+          {atkMultiplier !== 0 ? (
+            <span className="text-green-500">{atkMultiplier}</span>
+          ) : (
+            <span className="text-red-500">{atkMultiplier}</span>
+          )}
+        </div>
+        <div>
+          Final damage:{" "}
+          {finalDmg !== 0 ? (
+            <span className="text-green-500">{finalDmg}</span>
+          ) : (
+            <span className="text-red-500">{finalDmg}</span>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -301,6 +314,7 @@ function FightButtons({
 
 export default function MonsterFightPage() {
   const params = useParams();
+  const router = useRouter();
   const [showAttackDialog, setShowAttackDialog] = useState(false);
   const [showFailAttackDialog, setShowFailAttackDialog] = useState(false);
 
@@ -315,6 +329,7 @@ export default function MonsterFightPage() {
   const playerStats = useQuery(api.player_stats.getLevelStats, {
     level: player?.level ?? 1,
   });
+  const newPlayerStats = useMutation(api.players.updatePlayer);
   const [playerCurrentHp, setPlayerCurrentHp] = useState(0);
   const [playerAtk, setPlayerAtk] = useState(0);
   const [atkMultiplier, setAtkMultiplier] = useState(0);
@@ -326,6 +341,12 @@ export default function MonsterFightPage() {
 
   useEffect(() => {
     if (!currentMonster || !playerStats || !player) return;
+
+    if (player?.currentMonster < monsterId) {
+      alert("you can't fight this monster yet");
+      router.push("/fight");
+      return;
+    }
     setMonsterCurrentHp(currentMonster.hp);
     const monsterAtk = calculateMonsterDmg({ monster: currentMonster });
     setMonsterAtk(monsterAtk);
@@ -338,7 +359,7 @@ export default function MonsterFightPage() {
     setCurrentTask(randomTask);
   }, [currentMonster, playerStats, player]);
 
-  if (!currentMonster || !monsterId || !player || !playerStats) {
+  if (!currentMonster || !player || !playerStats) {
     return (
       <div className="flex h-screen justify-center items-center">
         <LoadingSpinner className="size-72" />
@@ -351,17 +372,19 @@ export default function MonsterFightPage() {
     setShowAttackDialog(true);
   };
 
-  const handleAttack = () => {
+  const handleAttack = async () => {
     const newMonsterHp = monsterCurrentHp - finalDmg;
     setMonsterCurrentHp(newMonsterHp);
     if (newMonsterHp <= 0) {
-      alert("You've defeated the monster!");
-      // TODO:
-      // update player stats,
-      // handle experience gain, gold,
-      // redirect,
-      // check levelup,
-      // update currentMonster id to show new monsters
+      const newPlayer = await newPlayerStats({
+        earnedExp: currentMonster.exp + 40,
+        earnedGold: currentMonster.gold,
+        monsterId: currentMonster.showId,
+      });
+      alert(`${newPlayer.current_exp}, player level: ${newPlayer.level}`);
+      // TODO: show alert dialog with new gold and exp, probably have to do handleShowDefeatedResultDialog and handleDefeatedResult again
+
+      router.push("/fight");
     }
 
     const newPlayerHp = playerCurrentHp - monsterAtk;

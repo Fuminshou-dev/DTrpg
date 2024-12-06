@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
 import localFont from "next/font/local";
+import { Button } from "@/components/ui/button";
+import { ModeToggle } from "./theme-toggle";
 
 const myFont = localFont({
   src: "../../public/fonts/font.ttf",
@@ -20,7 +22,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${myFont.className} antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <div className="fixed bottom-6 left-6 h-10">
+            <ModeToggle />
+          </div>
+        </Providers>
       </body>
     </html>
   );

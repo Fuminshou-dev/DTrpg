@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 
 export const createPlayer = mutation({
   args: { playerName: v.string() },
@@ -72,5 +72,118 @@ export const getPlayer = query({
       return null;
     }
     return player;
+  },
+});
+
+export const updatePlayer = mutation({
+  args: {
+    monsterId: v.number(),
+    earnedGold: v.number(),
+    earnedExp: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    const userId = identity.subject;
+    const player = await ctx.db
+      .query("players")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+    if (!player) {
+      throw new Error("Player not found");
+    }
+
+    const playerStats = await ctx.db
+      .query("player_stats")
+      .withIndex("by_level", (q) => q.eq("level", player.level))
+      .first();
+
+    if (!playerStats) {
+      throw new Error("No stats found for this level");
+    }
+
+    const newPlayerExp = player.current_exp + args.earnedExp;
+    const newPlayerGold = player.gold + args.earnedGold;
+    const newPlayerMonster = args.monsterId + 1;
+    // get monster data from monsterid, check if it exists, if player.currentMonster = monster.showid increment player.currentmonster
+
+    const monster = await ctx.db
+      .query("monsters")
+      .withIndex("by_monsterID", (q) => q.eq("showId", args.monsterId))
+      .first();
+
+    if (!monster) {
+      throw new Error("No such monster");
+    }
+
+    if (player.currentMonster === monster.showId) {
+      console.log(
+        `calculation: ${player.currentMonster === monster.showId}, monsterId: ${monster.showId}, player.currentMonster: ${player.currentMonster}`
+      );
+      await ctx.db.patch(player._id, {
+        currentMonster: newPlayerMonster,
+      });
+    }
+
+    if (newPlayerExp > playerStats.required_exp) {
+      await ctx.db.patch(player._id, {
+        level: player.level + 1,
+        current_exp: newPlayerExp,
+      });
+    }
+    await ctx.db.patch(player._id, {
+      gold: newPlayerGold,
+      current_exp: newPlayerExp,
+    });
+
+    const newPlayer = await ctx.db
+      .query("players")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!newPlayer) {
+      throw new Error("Player not found after update");
+    }
+
+    return newPlayer;
+  },
+});
+
+export const resetPlayer = internalMutation({
+  args: {
+    playerId: v.id("players"),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.playerId, {
+      gold: 0,
+      current_exp: 0,
+      currentMonster: 0,
+      level: 1,
+      items: [
+        {
+          amount: 0,
+          type: "reroll",
+          itemName: "Reroll Potion",
+        },
+        {
+          amount: 0,
+          type: "restore1",
+          itemName: "Healing Potion",
+        },
+        {
+          amount: 0,
+          type: "restore2",
+          itemName: "Healing Hi-Potion",
+        },
+        {
+          amount: 0,
+          type: "special",
+          itemName: "Special Potion",
+        },
+      ],
+    });
+    return "Successfully reset player";
   },
 });

@@ -16,6 +16,7 @@ import { api } from "../../../convex/_generated/api";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import next from "next";
 
 const options = [
   {
@@ -66,7 +67,7 @@ export default function Game() {
     if (!player || !nextLevelStats) return;
     const required_exp = nextLevelStats.required_exp;
     const current_exp = player.current_exp;
-    const progressPercentage = (current_exp / required_exp) * 100;
+    const progressPercentage = Math.floor((current_exp / required_exp) * 100);
     setProgressValue(progressPercentage);
   }, [player, nextLevelStats]);
 
@@ -116,7 +117,7 @@ export default function Game() {
               {nextLevelStats.required_exp - player.current_exp}
             </span>
           </p>
-          <Progress indicatorcolor="" value={progressValue} />
+          <Progress indicatorcolor="bg-green-500" value={progressValue} />
           <Button
             asChild
             onClick={() => {

@@ -47,7 +47,7 @@ export const buyItem = mutation({
     const updatedItems = currentItems.map((item) =>
       item.type === args.type ? { ...item, amount: item.amount + 1 } : item
     );
-    const updatedPlayer = await ctx.db.patch(player._id, {
+    await ctx.db.patch(player._id, {
       items: updatedItems,
       gold: player.gold - itemPrice,
     });

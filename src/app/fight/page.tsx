@@ -58,11 +58,21 @@ export default function FightPage() {
             >
               <h1 className="text-3xl">{monster.monster_type}</h1>
               <div className="flex flex-col gap-2 w-full">
-                <p>Monster HP: {monster.hp}</p>
-                <p>Earned XP: {monster.exp}</p>
-                <p>Earned GOLD: {monster.gold}</p>
                 <p>
-                  Monster damage: {monster.min_dmg} - {monster.max_dmg}
+                  Monster HP: <span className="text-red-500">{monster.hp}</span>
+                </p>
+                <p>
+                  Earned XP:{" "}
+                  <span className="text-orange-400">{monster.exp}</span>
+                </p>
+                <p>
+                  Earned GOLD:{" "}
+                  <span className="text-yellow-400">{monster.gold}</span>
+                </p>
+                <p>
+                  Monster damage:
+                  <span className="text-red-500"> {monster.min_dmg}</span>-
+                  <span className="text-red-500">{monster.max_dmg}</span>
                 </p>
                 <Popover
                   open={selectedMonster === monster.monster_type}
