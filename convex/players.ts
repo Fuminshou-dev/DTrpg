@@ -1,11 +1,5 @@
 import { v } from "convex/values";
-import {
-  action,
-  httpAction,
-  internalMutation,
-  mutation,
-  query,
-} from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
 export const createPlayer = mutation({
   args: { playerName: v.string() },

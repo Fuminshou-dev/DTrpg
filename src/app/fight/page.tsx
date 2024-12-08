@@ -1,5 +1,4 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useMutation, useQuery } from "convex/react";
@@ -21,7 +20,7 @@ import {
   getRandomAtkMultiplier,
   getRandomTask,
 } from "../utils/utilFunctions";
-import { Doc } from "../../../convex/_generated/dataModel";
+import { Doc, Id } from "../../../convex/_generated/dataModel";
 
 async function updatePlayerFightStatus({
   updatePlayerFightStatusMutation,
@@ -31,17 +30,23 @@ async function updatePlayerFightStatus({
   monsterId,
   monsterHp,
   playerHp,
+  playerId,
+  resetPlayerMutation,
   monsterAtk,
   finalDmg,
 }: {
   updatePlayerFightStatusMutation: ReturnType<
     typeof useMutation<typeof api.players.updatePlayerFightStatus>
   >;
+  resetPlayerMutation: ReturnType<
+    typeof useMutation<typeof api.players.resetPlayer>
+  >;
   playerStats: Doc<"player_stats">;
   monster: Doc<"monsters">;
   playerAtk: number;
   monsterId: number;
   monsterHp: number;
+  playerId: Id<"players">;
   playerHp: number;
   finalDmg: number;
   monsterAtk: number;
@@ -50,6 +55,13 @@ async function updatePlayerFightStatus({
   const newRandomTask = getRandomTask({ monster });
   const newFinalDmg = calculateFinalDmg(playerStats.atk, newAtkMultipler);
   const newMonsterAtk = calculateMonsterDmg({ monster });
+
+  // check if the player is dead
+
+  if (playerHp - monsterAtk <= 0) {
+    return await resetPlayerMutation({ playerId });
+  }
+
   await updatePlayerFightStatusMutation({
     fightStatus: {
       status: "fighting",
@@ -73,6 +85,8 @@ function FailDialog({
   monster,
   monsterId,
   playerAtk,
+  resetPlayerMutation,
+  playerId,
   playerStats,
   setShowFailAttackDialog,
   updatePlayerFightStatusMutation,
@@ -82,12 +96,16 @@ function FailDialog({
   monsterHp: number;
   monsterAtk: number;
   monsterId: number;
+  playerId: Id<"players">;
   playerAtk: number;
   monster: Doc<"monsters">;
   playerStats: Doc<"player_stats">;
   setShowFailAttackDialog: (value: boolean) => void;
   updatePlayerFightStatusMutation: ReturnType<
     typeof useMutation<typeof api.players.updatePlayerFightStatus>
+  >;
+  resetPlayerMutation: ReturnType<
+    typeof useMutation<typeof api.players.resetPlayer>
   >;
 }) {
   return (
@@ -121,6 +139,8 @@ function FailDialog({
               setShowFailAttackDialog(false);
               // run the task failure function here
               updatePlayerFightStatus({
+                playerId,
+                resetPlayerMutation: resetPlayerMutation,
                 updatePlayerFightStatusMutation,
                 playerHp,
                 monsterHp,
@@ -142,12 +162,12 @@ function FailDialog({
 }
 
 export default function MonsterFightPage() {
-  const router = useRouter();
   const player = useQuery(api.players.getPlayer);
 
   const updatePlayerFightStatusMutation = useMutation(
     api.players.updatePlayerFightStatus
   );
+  const resetPlayerMutation = useMutation(api.players.resetPlayer);
   const [showFailAttackDialog, setShowFailAttackDialog] = useState(false);
   const playerLevel = player?.level ?? 0;
 
@@ -186,8 +206,7 @@ export default function MonsterFightPage() {
   }
 
   if (player.fightStatus === "idle") {
-    router.push("/choose-monster");
-    return null;
+    return <>You shouldn't be here</>;
   }
 
   if (!currentMonster) {
@@ -201,6 +220,8 @@ export default function MonsterFightPage() {
   return (
     <div className="container h-screen mx-auto flex flex-col gap-8 justify-center items-center">
       <FailDialog
+        playerId={player._id}
+        resetPlayerMutation={resetPlayerMutation}
         monster={currentMonster}
         monsterId={currentMonster.showId}
         playerAtk={playerAtk ?? 0}
