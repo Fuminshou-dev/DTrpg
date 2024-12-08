@@ -88,9 +88,9 @@ export default function Game() {
           className="flex flex-col gap-4 justify-center items-center border rounded-lg p-8"
         >
           <Authenticated>
-            <div className="border p-4">
-              <SignOutButton redirectUrl="/login" />
-            </div>
+            <Button variant={"outline"} className="border p-4" asChild>
+              <SignOutButton redirectUrl="/login"></SignOutButton>
+            </Button>
           </Authenticated>
           <h2 className="text-3xl">{player.playerName}</h2>
           <Skeleton className="w-16 h-16 rounded-lg"></Skeleton>
