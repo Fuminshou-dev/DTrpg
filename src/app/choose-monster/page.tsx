@@ -27,7 +27,7 @@ import {
   calculateMonsterDmg,
   getRandomAtkMultiplier,
   getRandomTask,
-} from "../fight/page";
+} from "../utils/utilFunctions";
 
 export default function FightPage() {
   const router = useRouter();
@@ -43,10 +43,6 @@ export default function FightPage() {
   });
 
   const atkMultiplier = getRandomAtkMultiplier();
-  const monsterDmg = calculateMonsterDmg;
-  const finalDmg = calculateFinalDmg(playerStats?.atk ?? 0, atkMultiplier);
-
-  const randomTask = getRandomTask;
 
   if (
     !monsters ||
@@ -162,9 +158,12 @@ export default function FightPage() {
                             fightStatus: {
                               status: "fighting",
                               atkMultiplier: atkMultiplier,
-                              currentTask: randomTask({ monster }),
-                              finalDmg: finalDmg,
-                              monsterAtk: monsterDmg({ monster }),
+                              currentTask: getRandomTask({ monster }),
+                              finalDmg: calculateFinalDmg(
+                                atkMultiplier,
+                                playerStats?.atk ?? 0
+                              ),
+                              monsterAtk: calculateMonsterDmg({ monster }),
                               monsterHp: monster.hp,
                               monsterId: monster.showId,
                               playerAtk: playerStats?.atk ?? 0,
