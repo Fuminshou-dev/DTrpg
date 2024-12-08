@@ -16,6 +16,7 @@ export default function LoginPage() {
       throw new Error("no playername");
     }
     const player = createPlayer({ playerName });
+    console.log("Created player:", player);
     router.push("/main");
   }
 

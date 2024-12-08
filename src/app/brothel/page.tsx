@@ -6,7 +6,7 @@ import { useQuery } from "convex/react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 
 export default function BrothelPage() {
   const [isLoading, setIsLoading] = useState(false);

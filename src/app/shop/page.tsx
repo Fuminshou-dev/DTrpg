@@ -3,20 +3,20 @@ import { Button } from "@/components/ui/button";
 import { useMutation, useQuery } from "convex/react";
 import React, { useState } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 
-import restore1 from "../../../../public/restore1.jpg";
+import restore1 from "@/public/restore1.jpg";
 
-import restore2 from "../../../../public/restore2.jpg";
+import restore2 from "@/public/restore2.jpg";
 
-import reroll from "../../../../public/reroll.jpg";
+import reroll from "@/public/reroll.jpg";
 
-import special from "../../../../public/special.jpg";
+import special from "@/public/special.jpg";
 
 import { useRouter } from "next/navigation";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 
-const itemImages: { [key: string]: any } = {
+const itemImages: { [key: string]: StaticImageData } = {
   restore1: restore1,
   restore2: restore2,
   special: special,

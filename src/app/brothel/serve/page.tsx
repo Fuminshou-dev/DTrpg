@@ -1,22 +1,21 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { useMutation, useQuery } from "convex/react";
-import Link from "next/link";
-import { useState } from "react";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { redirect, useRouter } from "next/navigation";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogDescription,
 } from "@/components/ui/alert-dialog";
-import { api } from "../../../../../convex/_generated/api";
+import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useMutation, useQuery } from "convex/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { api } from "../../../../convex/_generated/api";
 
 export default function ServePage() {
   const updateGold = useMutation(api.customer_tasks.completedBrothelTask);
@@ -41,7 +40,7 @@ export default function ServePage() {
       </div>
     );
   }
-  let earnedGold = task.gold * customer.price;
+  const earnedGold = task.gold * customer.price;
 
   return (
     <div className="container mx-auto flex flex-col h-screen justify-center items-center gap-4">

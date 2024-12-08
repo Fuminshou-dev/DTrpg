@@ -1,11 +1,5 @@
-import { fail } from "assert";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-
-type Item = {
-  amount: number;
-  type: "restore1" | "restore2" | "special" | "reroll";
-};
 
 export default defineSchema(
   {

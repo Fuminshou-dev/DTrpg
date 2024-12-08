@@ -8,19 +8,19 @@ import { cn } from "@/lib/utils";
 import { SignOutButton } from "@clerk/nextjs";
 import { Authenticated, useQuery } from "convex/react";
 import { AnimatePresence, motion } from "framer-motion";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import reroll from "../../../../public/reroll.jpg";
-import restore1 from "../../../../public/restore1.jpg";
-import restore2 from "../../../../public/restore2.jpg";
-import special from "../../../../public/special.jpg";
-import { api } from "../../../../convex/_generated/api";
+import reroll from "@/public/reroll.jpg";
+import restore1 from "@/public/restore1.jpg";
+import restore2 from "@/public/restore2.jpg";
+import special from "@/public/special.jpg";
+import { api } from "../../../convex/_generated/api";
 
 const options = [
   {
     name: "Fight",
-    redirect: "/fight",
+    redirect: "/choose-monster",
   },
   {
     name: "Brothel",
@@ -34,7 +34,7 @@ const options = [
 
 const itemOrder = ["restore1", "restore2", "reroll", "special"];
 
-const itemImages: { [key: string]: any } = {
+const itemImages: { [key: string]: StaticImageData } = {
   restore1: restore1,
   restore2: restore2,
   special: special,

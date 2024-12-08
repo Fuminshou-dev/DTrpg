@@ -17,8 +17,8 @@ import {
 import { useMutation, useQuery } from "convex/react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Doc } from "../../../../../convex/_generated/dataModel";
-import { api } from "../../../../../convex/_generated/api";
+import { Doc } from "../../../convex/_generated/dataModel";
+import { api } from "../../../convex/_generated/api";
 
 export const getRandomTask = ({ monster }: { monster: Doc<"monsters"> }) => {
   const randomTask =

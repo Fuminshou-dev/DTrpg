@@ -21,13 +21,13 @@ import {
 import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { api } from "../../../convex/_generated/api";
 import {
   calculateFinalDmg,
   calculateMonsterDmg,
   getRandomAtkMultiplier,
   getRandomTask,
-} from "./[monster]/page";
-import { api } from "../../../../convex/_generated/api";
+} from "../fight/page";
 
 export default function FightPage() {
   const router = useRouter();
@@ -171,7 +171,7 @@ export default function FightPage() {
                               playerHp: playerStats?.hp ?? 0,
                             },
                           });
-                          router.push(`/fight/${monster.showId}`);
+                          router.push(`/fight/`);
                           setMonsterToConfirm(null);
                         }}
                       >

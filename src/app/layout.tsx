@@ -3,10 +3,9 @@ import "./globals.css";
 import { Providers } from "./providers";
 import localFont from "next/font/local";
 import { ModeToggle } from "./theme-toggle";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 const myFont = localFont({
-  src: "../../public/fonts/font.ttf",
+  src: "../public/fonts/font.ttf",
 });
 
 export const metadata: Metadata = {
