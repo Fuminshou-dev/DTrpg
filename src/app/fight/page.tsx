@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -21,6 +22,15 @@ import {
   getRandomTask,
 } from "../utils/utilFunctions";
 import { Doc, Id } from "../../../convex/_generated/dataModel";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useRouter } from "next/navigation";
 
 async function updatePlayerFightStatus({
   updatePlayerFightStatusMutation,
@@ -28,6 +38,7 @@ async function updatePlayerFightStatus({
   monster,
   playerAtk,
   monsterId,
+  updatePlayerAfterDefeatingAMonster,
   monsterHp,
   playerHp,
   playerId,
@@ -44,6 +55,9 @@ async function updatePlayerFightStatus({
   playerStats: Doc<"player_stats">;
   monster: Doc<"monsters">;
   playerAtk: number;
+  updatePlayerAfterDefeatingAMonster: ReturnType<
+    typeof useMutation<typeof api.players.updatePlayerAfterDefeatingAMonster>
+  >;
   monsterId: number;
   monsterHp: number;
   playerId: Id<"players">;
@@ -60,6 +74,20 @@ async function updatePlayerFightStatus({
 
   if (playerHp - monsterAtk <= 0) {
     return await resetPlayerMutation({ playerId });
+  }
+
+  // check if monster is dead
+
+  if (monsterHp - finalDmg <= 0) {
+    await updatePlayerFightStatusMutation({
+      fightStatus: "idle",
+    });
+    await updatePlayerAfterDefeatingAMonster({
+      earnedExp: monster.exp,
+      earnedGold: monster.gold,
+      monsterId: monsterId,
+    });
+    return;
   }
 
   await updatePlayerFightStatusMutation({
@@ -81,6 +109,7 @@ function FailDialog({
   showFailAttackDialog,
   playerHp,
   monsterHp,
+  updatePlayerAfterDefeatingAMonster,
   monsterAtk,
   monster,
   monsterId,
@@ -93,6 +122,9 @@ function FailDialog({
 }: {
   showFailAttackDialog: boolean;
   playerHp: number;
+  updatePlayerAfterDefeatingAMonster: ReturnType<
+    typeof useMutation<typeof api.players.updatePlayerAfterDefeatingAMonster>
+  >;
   monsterHp: number;
   monsterAtk: number;
   monsterId: number;
@@ -117,9 +149,13 @@ function FailDialog({
           </AlertDialogTitle>
           <AlertDialogDescription className="flex flex-col text-lg">
             <span>You have failed the task. What a pity.</span>
-            <span>The monster will now deal damage to you.</span>
             <span>
-              Your current HP: <span className="text-red-500">{playerHp}</span>
+              <span className="text-red-500">{monster.monster_type}</span> will
+              deal dmg to you{" "}
+            </span>
+            <span>
+              Your current HP:{" "}
+              <span className="text-green-500">{playerHp}</span>
             </span>
             <span>
               Monster HP: <span className="text-red-500">{monsterHp}</span>
@@ -128,29 +164,172 @@ function FailDialog({
               Monster damage: <span className="text-red-500">{monsterAtk}</span>
             </span>
             <span>
-              Your new HP:{" "}
-              <span className="text-red-500">{playerHp - monsterAtk}</span>
+              Your new HP:
+              <span className="text-green-500">{playerHp - monsterAtk}</span>
             </span>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogAction
+            onClick={(event) => {
+              const button = event.currentTarget;
+              button.disabled = true;
+              button.textContent = "Loading...";
+
+              setTimeout(() => {
+                setShowFailAttackDialog(false);
+                // run the task failure function here
+                updatePlayerFightStatus({
+                  playerId,
+                  resetPlayerMutation: resetPlayerMutation,
+                  updatePlayerFightStatusMutation,
+                  updatePlayerAfterDefeatingAMonster,
+                  playerHp,
+                  monsterHp,
+                  monsterAtk,
+                  finalDmg: 0,
+                  monster,
+                  playerStats,
+                  monsterId,
+                  playerAtk,
+                });
+              }, 3000);
+            }}
+          >
+            Continue
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+function ScuccessAttackDialog({
+  playerHp,
+  updatePlayerAfterDefeatingAMonster,
+  monsterHp,
+  monsterAtk,
+  monster,
+  monsterId,
+  playerAtk,
+  finalDmg,
+  resetPlayerMutation,
+  showSuccessAttackDialog,
+  setShowSuccessAttackDialog,
+  playerId,
+  playerStats,
+  updatePlayerFightStatusMutation,
+}: {
+  playerHp: number;
+  monsterHp: number;
+  updatePlayerAfterDefeatingAMonster: ReturnType<
+    typeof useMutation<typeof api.players.updatePlayerAfterDefeatingAMonster>
+  >;
+  finalDmg: number;
+  monsterAtk: number;
+  showSuccessAttackDialog: boolean;
+  setShowSuccessAttackDialog: (value: boolean) => void;
+  monsterId: number;
+  playerId: Id<"players">;
+  playerAtk: number;
+  monster: Doc<"monsters">;
+  playerStats: Doc<"player_stats">;
+  updatePlayerFightStatusMutation: ReturnType<
+    typeof useMutation<typeof api.players.updatePlayerFightStatus>
+  >;
+  resetPlayerMutation: ReturnType<
+    typeof useMutation<typeof api.players.resetPlayer>
+  >;
+}) {
+  return (
+    <AlertDialog open={showSuccessAttackDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-2xl text-center">
+            Congratulations!
+          </AlertDialogTitle>
+          <AlertDialogDescription asChild className="flex flex-col text-lg">
+            <div>
+              <span className="border-b-4 text-center">
+                You have successfully completed the task!
+              </span>
+              <Table className="mt-8">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-3xl"></TableHead>
+                    <TableHead className="text-3xl text-green-500">
+                      Player
+                    </TableHead>
+                    <TableHead className="text-3xl text-red-500">
+                      {monster.monster_type}
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="text-2xl">Attack</TableCell>
+                    <TableCell className="text-2xl text-green-500">
+                      {finalDmg}
+                    </TableCell>
+                    <TableCell className="text-2xl text-red-500">
+                      {monsterAtk}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="text-2xl">HP</TableCell>
+                    <TableCell className="text-2xl text-green-500">
+                      {playerHp}
+                    </TableCell>
+                    <TableCell className="text-2xl text-red-500">
+                      {monsterHp}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="text-2xl">New HP</TableCell>
+                    <TableCell className="text-2xl text-green-500">
+                      {playerHp - monsterAtk}
+                    </TableCell>
+                    <TableCell className="text-2xl text-red-500">
+                      {monsterHp - finalDmg}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel
             onClick={() => {
-              setShowFailAttackDialog(false);
-              // run the task failure function here
-              updatePlayerFightStatus({
-                playerId,
-                resetPlayerMutation: resetPlayerMutation,
-                updatePlayerFightStatusMutation,
-                playerHp,
-                monsterHp,
-                monsterAtk,
-                finalDmg: 0,
-                monster,
-                playerStats,
-                monsterId,
-                playerAtk,
-              });
+              setShowSuccessAttackDialog(false);
+            }}
+          >
+            Cancel
+          </AlertDialogCancel>
+
+          <AlertDialogAction
+            onClick={(event) => {
+              const button = event.currentTarget;
+              button.disabled = true;
+              button.textContent = "Loading...";
+
+              setTimeout(() => {
+                setShowSuccessAttackDialog(false);
+                updatePlayerFightStatus({
+                  playerId,
+                  updatePlayerAfterDefeatingAMonster,
+                  resetPlayerMutation: resetPlayerMutation,
+                  updatePlayerFightStatusMutation,
+                  playerHp,
+                  monsterHp,
+                  monsterAtk,
+                  finalDmg,
+                  monster,
+                  playerStats,
+                  monsterId,
+                  playerAtk,
+                });
+              }, 3000);
             }}
           >
             Continue
@@ -162,13 +341,17 @@ function FailDialog({
 }
 
 export default function MonsterFightPage() {
+  const router = useRouter();
   const player = useQuery(api.players.getPlayer);
-
+  const updatePlayerAfterDefeatingAMonster = useMutation(
+    api.players.updatePlayerAfterDefeatingAMonster
+  );
   const updatePlayerFightStatusMutation = useMutation(
     api.players.updatePlayerFightStatus
   );
   const resetPlayerMutation = useMutation(api.players.resetPlayer);
   const [showFailAttackDialog, setShowFailAttackDialog] = useState(false);
+  const [showSuccessAttackDialog, setShowSuccessAttackDialog] = useState(false);
   const playerLevel = player?.level ?? 0;
 
   const levelStats = useQuery(api.player_stats.getLevelStats, {
@@ -206,7 +389,7 @@ export default function MonsterFightPage() {
   }
 
   if (player.fightStatus === "idle") {
-    return <>You shouldn't be here</>;
+    return router.push("/choose-monster");
   }
 
   if (!currentMonster) {
@@ -219,8 +402,25 @@ export default function MonsterFightPage() {
 
   return (
     <div className="container h-screen mx-auto flex flex-col gap-8 justify-center items-center">
+      <ScuccessAttackDialog
+        updatePlayerAfterDefeatingAMonster={updatePlayerAfterDefeatingAMonster}
+        finalDmg={finalDmg ?? 0}
+        playerId={player._id}
+        resetPlayerMutation={resetPlayerMutation}
+        monster={currentMonster}
+        monsterId={currentMonster.showId}
+        playerAtk={playerAtk ?? 0}
+        playerStats={levelStats}
+        updatePlayerFightStatusMutation={updatePlayerFightStatusMutation}
+        setShowSuccessAttackDialog={setShowSuccessAttackDialog}
+        showSuccessAttackDialog={showSuccessAttackDialog}
+        playerHp={playerHp ?? 0}
+        monsterHp={monsterHp ?? 0}
+        monsterAtk={monsterAtk ?? 0}
+      />
       <FailDialog
         playerId={player._id}
+        updatePlayerAfterDefeatingAMonster={updatePlayerAfterDefeatingAMonster}
         resetPlayerMutation={resetPlayerMutation}
         monster={currentMonster}
         monsterId={currentMonster.showId}
@@ -346,26 +546,11 @@ export default function MonsterFightPage() {
       <div className="flex flex-row justify-evenly items-center w-full  border">
         <Button
           className="my-4"
-          onClick={() =>
-            updatePlayerFightStatus({
-              fightStatus: {
-                status: "fighting",
-                monsterId: monsterId ?? 0,
-                currentTask: currentTask ?? {
-                  task_description: "",
-                  break_time: 0,
-                },
-                playerAtk: playerAtk ?? 0,
-                monsterAtk: monsterAtk ?? 0,
-                playerHp: playerHp ?? 0,
-                monsterHp: monsterHp ?? 0,
-                atkMultiplier: atkMultiplier ?? 0,
-                finalDmg: finalDmg ?? 0,
-              },
-            })
-          }
+          onClick={() => {
+            setShowSuccessAttackDialog(true);
+          }}
         >
-          Update
+          Success
         </Button>
         <Button
           className="my-4"

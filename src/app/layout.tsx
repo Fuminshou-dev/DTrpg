@@ -5,7 +5,8 @@ import localFont from "next/font/local";
 import { ModeToggle } from "./theme-toggle";
 
 const myFont = localFont({
-  src: "../public/fonts/font.ttf",
+  // src: "../public/fonts/font.ttf",
+  src: "../public/fonts/Roboto-Regular.ttf",
 });
 
 export const metadata: Metadata = {
@@ -20,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${myFont.className} antialiased`}>
+      <body className={`${myFont.className}  antialiased`}>
         <Providers>
           {children}
           <div className="fixed bottom-6 left-6 h-10">

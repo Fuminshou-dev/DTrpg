@@ -91,7 +91,7 @@ export const getPlayer = query({
     return player;
   },
 });
-export const updatePlayerAfterSuccesfullAttack = mutation({
+export const updatePlayerAfterDefeatingAMonster = mutation({
   args: {
     monsterId: v.number(),
     earnedGold: v.number(),
@@ -159,7 +159,6 @@ export const updatePlayerAfterSuccesfullAttack = mutation({
     await ctx.db.patch(player._id, {
       gold: newPlayerGold,
       current_exp: newPlayerExp,
-      fightStatus: "idle",
     });
 
     const newPlayer = await ctx.db

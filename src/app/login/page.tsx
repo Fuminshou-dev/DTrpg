@@ -3,7 +3,7 @@
 import { SignInButton, SignUpButton, useUser } from "@clerk/nextjs";
 import { Unauthenticated, useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 
 export default function LoginPage() {
   const router = useRouter();
