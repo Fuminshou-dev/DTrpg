@@ -5,11 +5,150 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useMutation, useQuery } from "convex/react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
+import {
+  calculateFinalDmg,
+  calculateMonsterDmg,
+  getRandomAtkMultiplier,
+  getRandomTask,
+} from "../utils/utilFunctions";
+import { Doc } from "../../../convex/_generated/dataModel";
+
+async function updatePlayerFightStatus({
+  updatePlayerFightStatusMutation,
+  playerStats,
+  monster,
+  playerAtk,
+  monsterId,
+  monsterHp,
+  playerHp,
+  monsterAtk,
+  finalDmg,
+}: {
+  updatePlayerFightStatusMutation: ReturnType<
+    typeof useMutation<typeof api.players.updatePlayerFightStatus>
+  >;
+  playerStats: Doc<"player_stats">;
+  monster: Doc<"monsters">;
+  playerAtk: number;
+  monsterId: number;
+  monsterHp: number;
+  playerHp: number;
+  finalDmg: number;
+  monsterAtk: number;
+}) {
+  const newAtkMultipler = getRandomAtkMultiplier();
+  const newRandomTask = getRandomTask({ monster });
+  const newFinalDmg = calculateFinalDmg(playerStats.atk, newAtkMultipler);
+  const newMonsterAtk = calculateMonsterDmg({ monster });
+  await updatePlayerFightStatusMutation({
+    fightStatus: {
+      status: "fighting",
+      monsterHp: monsterHp - finalDmg,
+      playerHp: playerHp - monsterAtk,
+      monsterId: monsterId,
+      atkMultiplier: newAtkMultipler,
+      currentTask: newRandomTask,
+      finalDmg: newFinalDmg,
+      monsterAtk: newMonsterAtk,
+      playerAtk: playerAtk,
+    },
+  });
+}
+
+function FailDialog({
+  showFailAttackDialog,
+  playerHp,
+  monsterHp,
+  monsterAtk,
+  monster,
+  monsterId,
+  playerAtk,
+  playerStats,
+  setShowFailAttackDialog,
+  updatePlayerFightStatusMutation,
+}: {
+  showFailAttackDialog: boolean;
+  playerHp: number;
+  monsterHp: number;
+  monsterAtk: number;
+  monsterId: number;
+  playerAtk: number;
+  monster: Doc<"monsters">;
+  playerStats: Doc<"player_stats">;
+  setShowFailAttackDialog: (value: boolean) => void;
+  updatePlayerFightStatusMutation: ReturnType<
+    typeof useMutation<typeof api.players.updatePlayerFightStatus>
+  >;
+}) {
+  return (
+    <AlertDialog open={showFailAttackDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-2xl">
+            You are a failure!
+          </AlertDialogTitle>
+          <AlertDialogDescription className="flex flex-col text-lg">
+            <span>You have failed the task. What a pity.</span>
+            <span>The monster will now deal damage to you.</span>
+            <span>
+              Your current HP: <span className="text-red-500">{playerHp}</span>
+            </span>
+            <span>
+              Monster HP: <span className="text-red-500">{monsterHp}</span>
+            </span>
+            <span>
+              Monster damage: <span className="text-red-500">{monsterAtk}</span>
+            </span>
+            <span>
+              Your new HP:{" "}
+              <span className="text-red-500">{playerHp - monsterAtk}</span>
+            </span>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogAction
+            onClick={() => {
+              setShowFailAttackDialog(false);
+              // run the task failure function here
+              updatePlayerFightStatus({
+                updatePlayerFightStatusMutation,
+                playerHp,
+                monsterHp,
+                monsterAtk,
+                finalDmg: 0,
+                monster,
+                playerStats,
+                monsterId,
+                playerAtk,
+              });
+            }}
+          >
+            Continue
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 export default function MonsterFightPage() {
   const router = useRouter();
   const player = useQuery(api.players.getPlayer);
 
+  const updatePlayerFightStatusMutation = useMutation(
+    api.players.updatePlayerFightStatus
+  );
+  const [showFailAttackDialog, setShowFailAttackDialog] = useState(false);
   const playerLevel = player?.level ?? 0;
 
   const levelStats = useQuery(api.player_stats.getLevelStats, {
@@ -38,7 +177,7 @@ export default function MonsterFightPage() {
     monsterId: monsterId ?? 0,
   });
 
-  if (!player) {
+  if (!player || !levelStats) {
     return (
       <div className="flex h-screen justify-center items-center">
         <LoadingSpinner className="size-72" />
@@ -61,6 +200,18 @@ export default function MonsterFightPage() {
 
   return (
     <div className="container h-screen mx-auto flex flex-col gap-8 justify-center items-center">
+      <FailDialog
+        monster={currentMonster}
+        monsterId={currentMonster.showId}
+        playerAtk={playerAtk ?? 0}
+        playerStats={levelStats}
+        updatePlayerFightStatusMutation={updatePlayerFightStatusMutation}
+        setShowFailAttackDialog={setShowFailAttackDialog}
+        showFailAttackDialog={showFailAttackDialog}
+        playerHp={playerHp ?? 0}
+        monsterHp={monsterHp ?? 0}
+        monsterAtk={monsterAtk ?? 0}
+      />
       <div className="flex flex-col justify-center items-center w-full border">
         <h1 className="p-4 w-full text-center text-3xl">
           {currentMonster.monster_type}
@@ -155,7 +306,7 @@ export default function MonsterFightPage() {
       </div>
       <div className="flex flex-col justify-center items-center w-full p-4 gap-4 border">
         <p className="text-3xl">Task:</p>
-        <p className="text-2xl">
+        <div className="text-2xl">
           <p className="text-center">{currentTask?.task_description}</p>
           <p>
             Maximum allowed break time:
@@ -169,7 +320,7 @@ export default function MonsterFightPage() {
             </span>
             seconds
           </p>
-        </p>
+        </div>
       </div>
       <div className="flex flex-row justify-evenly items-center w-full  border">
         <Button
@@ -195,8 +346,14 @@ export default function MonsterFightPage() {
         >
           Update
         </Button>
-        <Button className="my-4" onClick={() => router.push("/choose-monster")}>
-          Leave
+        <Button
+          className="my-4"
+          onClick={() => {
+            // show a fail dialog here
+            setShowFailAttackDialog(true);
+          }}
+        >
+          Fail
         </Button>
       </div>
     </div>
