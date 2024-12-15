@@ -1,7 +1,7 @@
 import { useMutation } from "convex/react";
-import { Doc, Id } from "../../../convex/_generated/dataModel";
-import { ATK_MULTIPLIER } from "./constants";
 import { api } from "../../../convex/_generated/api";
+import { Doc } from "../../../convex/_generated/dataModel";
+import { ATK_MULTIPLIER } from "./constants";
 
 export const getRandomTask = ({ monster }: { monster: Doc<"monsters"> }) => {
   const randomTask =
@@ -36,29 +36,19 @@ export async function updatePlayerFightStatus({
   monster,
   playerAtk,
   monsterId,
-  updatePlayerAfterDefeatingAMonster,
   monsterHp,
   playerHp,
-  playerId,
-  resetPlayerMutation,
   monsterAtk,
   finalDmg,
 }: {
   updatePlayerFightStatusMutation: ReturnType<
     typeof useMutation<typeof api.players.updatePlayerFightStatus>
   >;
-  resetPlayerMutation: ReturnType<
-    typeof useMutation<typeof api.players.resetPlayer>
-  >;
   playerStats: Doc<"player_stats">;
   monster: Doc<"monsters">;
   playerAtk: number;
-  updatePlayerAfterDefeatingAMonster: ReturnType<
-    typeof useMutation<typeof api.players.updatePlayerAfterDefeatingAMonster>
-  >;
   monsterId: number;
   monsterHp: number;
-  playerId: Id<"players">;
   playerHp: number;
   finalDmg: number;
   monsterAtk: number;
@@ -71,21 +61,13 @@ export async function updatePlayerFightStatus({
   // check if the player is dead
 
   if (playerHp - monsterAtk <= 0) {
-    return await resetPlayerMutation({ playerId });
+    return { status: "player_dead" };
   }
 
   // check if monster is dead
 
   if (monsterHp - finalDmg <= 0) {
-    await updatePlayerFightStatusMutation({
-      fightStatus: "idle",
-    });
-    await updatePlayerAfterDefeatingAMonster({
-      earnedExp: monster.exp,
-      earnedGold: monster.gold,
-      monsterId: monsterId,
-    });
-    return;
+    return { status: "monster_dead" };
   }
 
   await updatePlayerFightStatusMutation({
@@ -101,4 +83,6 @@ export async function updatePlayerFightStatus({
       playerAtk: playerAtk,
     },
   });
+
+  return { status: "fight_continues" };
 }

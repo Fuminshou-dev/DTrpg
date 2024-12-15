@@ -1,4 +1,5 @@
 "use client";
+import { updatePlayerFightStatus } from "@/app/utils/utilFunctions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,45 +20,38 @@ import {
 } from "@/components/ui/table";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Doc, Id } from "../../convex/_generated/dataModel";
-import { updatePlayerFightStatus } from "@/app/utils/utilFunctions";
+import { Doc } from "../../convex/_generated/dataModel";
 
 export default function SuccessAttackDialog({
   playerHp,
-  updatePlayerAfterDefeatingAMonster,
   monsterHp,
   monsterAtk,
   monster,
   monsterId,
   playerAtk,
+  setIsPlayerDead,
   finalDmg,
-  resetPlayerMutation,
   showSuccessAttackDialog,
   setShowSuccessAttackDialog,
-  playerId,
   playerStats,
+  setIsMonsterDead,
   updatePlayerFightStatusMutation,
 }: {
   playerHp: number;
   monsterHp: number;
-  updatePlayerAfterDefeatingAMonster: ReturnType<
-    typeof useMutation<typeof api.players.updatePlayerAfterDefeatingAMonster>
-  >;
   finalDmg: number;
   monsterAtk: number;
   showSuccessAttackDialog: boolean;
   setShowSuccessAttackDialog: (value: boolean) => void;
   monsterId: number;
-  playerId: Id<"players">;
   playerAtk: number;
   monster: Doc<"monsters">;
   playerStats: Doc<"player_stats">;
   updatePlayerFightStatusMutation: ReturnType<
     typeof useMutation<typeof api.players.updatePlayerFightStatus>
   >;
-  resetPlayerMutation: ReturnType<
-    typeof useMutation<typeof api.players.resetPlayer>
-  >;
+  setIsMonsterDead: (value: boolean) => void;
+  setIsPlayerDead: (value: boolean) => void;
 }) {
   return (
     <AlertDialog open={showSuccessAttackDialog}>
@@ -131,12 +125,9 @@ export default function SuccessAttackDialog({
               button.disabled = true;
               button.textContent = "Loading...";
 
-              setTimeout(() => {
+              setTimeout(async () => {
                 setShowSuccessAttackDialog(false);
-                updatePlayerFightStatus({
-                  playerId,
-                  updatePlayerAfterDefeatingAMonster,
-                  resetPlayerMutation: resetPlayerMutation,
+                const { status } = await updatePlayerFightStatus({
                   updatePlayerFightStatusMutation,
                   playerHp,
                   monsterHp,
@@ -147,6 +138,12 @@ export default function SuccessAttackDialog({
                   monsterId,
                   playerAtk,
                 });
+                if (status === "player_dead") {
+                  setIsPlayerDead(true);
+                }
+                if (status === "monster_dead") {
+                  setIsMonsterDead(true);
+                }
               }, 3000);
             }}
           >

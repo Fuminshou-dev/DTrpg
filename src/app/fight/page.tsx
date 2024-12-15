@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Progress } from "@/components/ui/progress";
 import { useMutation, useQuery } from "convex/react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import PlayerDeadDialog from "@/components/PlayerDeadDialog";
+import MonsterDeadDialog from "@/components/MonsterDeadDialog";
 
 export default function MonsterFightPage() {
-  const router = useRouter();
   const player = useQuery(api.players.getPlayer);
-  const updatePlayerAfterDefeatingAMonster = useMutation(
+  const updatePlayerAfterDefeatingAMonsterMutation = useMutation(
     api.players.updatePlayerAfterDefeatingAMonster
   );
   const updatePlayerFightStatusMutation = useMutation(
@@ -21,11 +21,18 @@ export default function MonsterFightPage() {
   const resetPlayerMutation = useMutation(api.players.resetPlayer);
   const [showFailAttackDialog, setShowFailAttackDialog] = useState(false);
   const [showSuccessAttackDialog, setShowSuccessAttackDialog] = useState(false);
+  const [isPlayerDead, setIsPlayedDead] = useState(false);
+  const [isMonsterDead, setIsMonsterDead] = useState(false);
   const playerLevel = player?.level ?? 0;
 
   const levelStats = useQuery(api.player_stats.getLevelStats, {
     level: playerLevel,
   });
+
+  const nextLevelStats = useQuery(
+    api.player_stats.getLevelStats,
+    (player && { level: player.level + 1 }) ?? { level: 1 }
+  );
 
   const playerFightStatus =
     player?.fightStatus !== "idle" ? player?.fightStatus : null;
@@ -45,7 +52,7 @@ export default function MonsterFightPage() {
     monsterId: monsterId ?? 0,
   });
 
-  if (!player || !levelStats) {
+  if (!player || !levelStats || !nextLevelStats) {
     return (
       <div className="flex h-screen justify-center items-center">
         <LoadingSpinner className="size-72" />
@@ -54,7 +61,7 @@ export default function MonsterFightPage() {
   }
 
   if (player.fightStatus === "idle") {
-    return router.push("/choose-monster");
+    return;
   }
 
   if (!currentMonster) {
@@ -67,11 +74,16 @@ export default function MonsterFightPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen flex flex-col justify-center">
-      <SuccessAttackDialog
-        updatePlayerAfterDefeatingAMonster={updatePlayerAfterDefeatingAMonster}
-        finalDmg={finalDmg ?? 0}
+      <PlayerDeadDialog
+        isPlayerDead={isPlayerDead}
         playerId={player._id}
-        resetPlayerMutation={resetPlayerMutation}
+        resetPlayer={resetPlayerMutation}
+        setIsPlayerDead={setIsPlayedDead}
+      />
+      <SuccessAttackDialog
+        setIsMonsterDead={setIsMonsterDead}
+        setIsPlayerDead={setIsPlayedDead}
+        finalDmg={finalDmg ?? 0}
         monster={currentMonster}
         monsterId={currentMonster.showId}
         playerAtk={playerAtk ?? 0}
@@ -84,9 +96,7 @@ export default function MonsterFightPage() {
         monsterAtk={monsterAtk ?? 0}
       />
       <FailDialog
-        playerId={player._id}
-        updatePlayerAfterDefeatingAMonster={updatePlayerAfterDefeatingAMonster}
-        resetPlayerMutation={resetPlayerMutation}
+        setIsPlayerDead={setIsPlayedDead}
         monster={currentMonster}
         monsterId={currentMonster.showId}
         playerAtk={playerAtk ?? 0}
@@ -97,6 +107,17 @@ export default function MonsterFightPage() {
         playerHp={playerHp ?? 0}
         monsterHp={monsterHp ?? 0}
         monsterAtk={monsterAtk ?? 0}
+      />
+      <MonsterDeadDialog
+        nextLevelStats={nextLevelStats}
+        levelStats={levelStats}
+        player={player}
+        isMonsterDead={isMonsterDead}
+        monster={currentMonster}
+        setIsMonsterDead={setIsMonsterDead}
+        updatePlayerAfterDefeatingAMonster={
+          updatePlayerAfterDefeatingAMonsterMutation
+        }
       />
       <div className="flex flex-col gap-6 max-w-2xl mx-auto w-full">
         <div className="flex flex-col md:flex-row gap-6 max-w-4xl mx-auto w-full">

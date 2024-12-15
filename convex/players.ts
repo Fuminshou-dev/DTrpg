@@ -142,9 +142,6 @@ export const updatePlayerAfterDefeatingAMonster = mutation({
     }
 
     if (player.currentMonster === monster.showId) {
-      console.log(
-        `calculation: ${player.currentMonster === monster.showId}, monsterId: ${monster.showId}, player.currentMonster: ${player.currentMonster}`
-      );
       await ctx.db.patch(player._id, {
         currentMonster: newPlayerMonster,
       });
@@ -159,6 +156,7 @@ export const updatePlayerAfterDefeatingAMonster = mutation({
     await ctx.db.patch(player._id, {
       gold: newPlayerGold,
       current_exp: newPlayerExp,
+      fightStatus: "idle",
     });
 
     const newPlayer = await ctx.db

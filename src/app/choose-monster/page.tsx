@@ -141,9 +141,9 @@ export default function FightPage() {
                         Are you absolutely sure?
                       </AlertDialogTitle>
                       <AlertDialogDescription>
-                        This action cannot be undone. This will permanently
-                        delete your account and remove your data from our
-                        servers.
+                        This action cannot be undone. You will be locked to this
+                        fight until either you defeat the monster or it defeats
+                        you.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
