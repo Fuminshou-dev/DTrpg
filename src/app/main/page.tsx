@@ -16,6 +16,12 @@ import restore2 from "@/public/restore2.jpg";
 import special from "@/public/special.jpg";
 import { api } from "../../../convex/_generated/api";
 import Link from "next/link";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const itemOrder = ["restore1", "restore2", "reroll", "special"];
 
@@ -197,7 +203,7 @@ export default function Game() {
                         delay: index * 0.1,
                         exit: { duration: 0.15, delay: 0 },
                       }}
-                      className="flex flex-col border justify-center items-center rounded-lg p-4 max-w-lg gap-4"
+                      className="flex flex-col border justify-evenly items-center rounded-lg p-2 w-full h-full max-w-sm max-h-sm gap-2"
                     >
                       <h1 className="text-3xl">{item.itemName}</h1>
                       <Image
@@ -205,7 +211,7 @@ export default function Game() {
                         alt={item.type}
                         width={60}
                       />
-                      <div className="text-lg h-8">
+                      <div className="text-sm text-center">
                         {ItemDescriptions[item.type]}
                       </div>
                       <div className="text-2xl">
@@ -221,7 +227,45 @@ export default function Game() {
                         </span>{" "}
                         of this item
                       </div>
-                      <Button>Use</Button>
+                      {item.type === "special" ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span tabIndex={0}>
+                                {/* TODO: Implement reroll and double dmg functionality */}
+                                <Button disabled={item.amount <= 0}>Use</Button>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {item.amount <= 0 ? (
+                                <p className="text-xl">
+                                  You don't have any of this item to use
+                                </p>
+                              ) : (
+                                <p className="text-xl">
+                                  Use this item to double your experience and
+                                  damage
+                                </p>
+                              )}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span tabIndex={0}>
+                                <Button disabled>Use</Button>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xl">
+                                You can only use this item during combat
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
                     </motion.div>
                   ))}
               </motion.div>

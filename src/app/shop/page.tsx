@@ -51,8 +51,8 @@ export default function ShopPage() {
   }
 
   return (
-    <div className="container mx-auto h-screen py-12 justify-center flex">
-      <div className="flex flex-col  gap-12 items-center w-3/4 h-3/4">
+    <div className="container mx-auto flex justify-center items-center h-screen w-screen">
+      <div className="flex flex-col gap-4">
         <Button
           className="flex p-4 text-lg"
           variant={"outline"}
@@ -62,11 +62,11 @@ export default function ShopPage() {
         >
           Go back
         </Button>
-        <div className="grid grid-cols-2 flex-1 w-full gap-12 p-4">
+        <div className="flex w-full flex-1 gap-2">
           {items?.map((item) => (
             <div
               key={item._id}
-              className="flex flex-col gap-8 text-center justify-center items-center border p-8 rounded-lg"
+              className="flex flex-col gap-4 text-center justify-evenly items-center border p-4 rounded-lg w-full max-h-sm max-w-sm"
             >
               <h1 className="text-2xl">{item.item}</h1>
               <Image
@@ -75,7 +75,7 @@ export default function ShopPage() {
                 src={itemImages[item.type]}
                 alt={item.item}
               ></Image>
-              <p>{item.effectDescription}</p>
+              <p className="text-center">{item.effectDescription}</p>
               <p className="text-xl">
                 Cost: <span className="text-yellow-400">{item.price}</span> Gold
               </p>

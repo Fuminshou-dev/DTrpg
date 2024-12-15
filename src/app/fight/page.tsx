@@ -10,6 +10,9 @@ import { api } from "../../../convex/_generated/api";
 import PlayerDeadDialog from "@/components/PlayerDeadDialog";
 import MonsterDeadDialog from "@/components/MonsterDeadDialog";
 
+// TODO: add item usage logic
+// TODO: implement victory screen if monsterId = 6 ( EVIL DEITY )
+
 export default function MonsterFightPage() {
   const player = useQuery(api.players.getPlayer);
   const updatePlayerAfterDefeatingAMonsterMutation = useMutation(
