@@ -35,6 +35,7 @@ export default defineSchema(
       required_exp: v.float64(),
     }).index("by_level", ["level"]),
     players: defineTable({
+      brothelCooldownUntil: v.optional(v.number()),
       userId: v.string(),
       playerName: v.string(),
       level: v.float64(),

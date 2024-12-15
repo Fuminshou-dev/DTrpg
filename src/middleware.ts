@@ -28,6 +28,19 @@ export default clerkMiddleware(async (auth, request) => {
       userId: userId ?? "",
     });
 
+    if (request.nextUrl.pathname.startsWith("/brothel")) {
+      const coolDownUntil = await convex.query(
+        api.players.getPlayerBrothelCooldown,
+        {
+          userId: userId,
+        }
+      );
+
+      if (Date.now() < coolDownUntil) {
+        return NextResponse.redirect(new URL(`/main`, request.url));
+      }
+    }
+
     if (fightStatus === "idle") {
       if (
         request.nextUrl.pathname !== "/" &&

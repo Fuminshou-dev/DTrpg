@@ -1,19 +1,10 @@
 "use client";
 
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { BrothelFailTaskDialog } from "@/components/BrothelFailTaskDialog";
+import { BrothelSuccessTaskDialog } from "@/components/BrothelSuccessTaskDialog";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useMutation, useQuery } from "convex/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "../../../../convex/_generated/api";
 
@@ -23,7 +14,10 @@ export default function ServePage() {
   const task = useQuery(api.customer_tasks.getRandomTask);
   const [showEarnedGold, setShowEarnedGold] = useState(false);
   const player = useQuery(api.players.getPlayer);
-  const router = useRouter();
+  const [showFailTaskDialog, setShowFailTaskDialog] = useState(false);
+  const setBrothelCooldownMutation = useMutation(
+    api.customers.setBrothelCooldown
+  );
 
   if (!player) {
     return (
@@ -44,49 +38,28 @@ export default function ServePage() {
 
   return (
     <div className="container mx-auto flex flex-col h-screen justify-center items-center gap-4">
-      <AlertDialog defaultOpen={false} open={showEarnedGold}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-3xl mb-2 border-b-2 p-2">
-              Congratulations!
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-2xl">
-              You've earned{" "}
-              <span className="text-yellow-400">{earnedGold}</span> gold from
-              completing the task.
-            </AlertDialogDescription>
-            <AlertDialogDescription className="text-2xl">
-              Your total gold is now:{" "}
-              <span className="text-yellow-400">{player.gold}</span>.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel asChild>
-              <Button
-                variant={"destructive"}
-                className="bg-green-400 hover:bg-green-600"
-                onClick={() => {
-                  setShowEarnedGold(false);
-                  router.replace("/brothel");
-                }}
-              >
-                OK
-              </Button>
-            </AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
       {!customer || !task ? (
         <div className="block">
           <LoadingSpinner className="size-24"></LoadingSpinner>
         </div>
       ) : (
         <div className={showEarnedGold ? "blur" : "flex flex-col gap-8"}>
+          <BrothelSuccessTaskDialog
+            earnedGold={earnedGold}
+            player={player}
+            setShowEarnedGold={setShowEarnedGold}
+            showEarnedGold={showEarnedGold}
+          />
+          <BrothelFailTaskDialog
+            setBrothelCooldownMutation={setBrothelCooldownMutation}
+            showFailTaskDialog={showFailTaskDialog}
+            setShowFailTaskDialog={setShowFailTaskDialog}
+          />
           <div className="flex justify-center items-center gap-2">
             <div className="flex flex-col gap-4 border p-8 rounded-lg text-2xl">
               <div>
                 Your customer is:{" "}
-                <span className="text-red-500 text-xl">
+                <span className="text-red-500 text-2xl">
                   {customer.customerType}
                 </span>{" "}
                 customer
@@ -126,8 +99,14 @@ export default function ServePage() {
             >
               Success
             </Button>
-            <Button size={"lg"} variant={"destructive"} asChild>
-              <Link href={"/brothel"}>Failure</Link>
+            <Button
+              onClick={() => {
+                setShowFailTaskDialog(true);
+              }}
+              size={"lg"}
+              variant={"destructive"}
+            >
+              Fail
             </Button>
           </div>
         </div>

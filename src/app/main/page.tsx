@@ -9,28 +9,13 @@ import { SignOutButton } from "@clerk/nextjs";
 import { Authenticated, useQuery } from "convex/react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image, { StaticImageData } from "next/image";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import reroll from "@/public/reroll.jpg";
 import restore1 from "@/public/restore1.jpg";
 import restore2 from "@/public/restore2.jpg";
 import special from "@/public/special.jpg";
 import { api } from "../../../convex/_generated/api";
-
-const options = [
-  {
-    name: "Fight",
-    redirect: "/choose-monster",
-  },
-  {
-    name: "Brothel",
-    redirect: "/brothel",
-  },
-  {
-    name: "Shop",
-    redirect: "/shop",
-  },
-];
+import Link from "next/link";
 
 const itemOrder = ["restore1", "restore2", "reroll", "special"];
 
@@ -48,10 +33,63 @@ const ItemDescriptions: { [key: string]: string } = {
   reroll: "Allows you to rerrol current roll",
 };
 
+function BrothelButton({
+  getPlayerBrothelCooldownQuery,
+}: {
+  getPlayerBrothelCooldownQuery: ReturnType<
+    typeof useQuery<typeof api.players.getPlayerBrothelCooldown>
+  >;
+}) {
+  const cooldown = getPlayerBrothelCooldownQuery;
+  const [countdown, setCountdown] = useState(0);
+
+  useEffect(() => {
+    if (!cooldown || Date.now() >= cooldown) return;
+
+    setCountdown(Math.ceil((cooldown - Date.now()) / 1000));
+
+    const timer = setInterval(() => {
+      setCountdown((prevCountdown) => {
+        if (prevCountdown <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prevCountdown - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [cooldown]);
+  if (!cooldown) {
+    return <>Loading...</>;
+  }
+
+  if (countdown > 0) {
+    return (
+      <Button
+        className="border rounded-lg p-16 cursor-not-allowed text-3xl"
+        variant={"ghost"}
+        disabled
+      >
+        Cooldown: {countdown}s
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      className="border rounded-lg p-16 cursor-pointer text-3xl"
+      asChild
+      variant={"ghost"}
+    >
+      <Link href={"/brothel"}>Brothel</Link>
+    </Button>
+  );
+}
+
 export default function Game() {
   const [progressValue, setProgressValue] = useState(0);
   const [showItems, setShowItems] = useState(false);
-  const router = useRouter();
   const player = useQuery(api.players.getPlayer);
   const levelStats = useQuery(
     api.player_stats.getLevelStats,
@@ -60,6 +98,13 @@ export default function Game() {
   const nextLevelStats = useQuery(
     api.player_stats.getLevelStats,
     player ? { level: player.level + 1 } : "skip"
+  );
+
+  const getPlayerBrothelCooldownQuery = useQuery(
+    api.players.getPlayerBrothelCooldown,
+    {
+      userId: player?.userId ?? "skip",
+    }
   );
 
   useEffect(() => {
@@ -189,19 +234,23 @@ export default function Game() {
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className="grid grid-cols-1 gap-4 justify-center items-center"
         >
-          {options.map((el) => (
-            <Button
-              key={el.name}
-              className="border rounded-lg p-16 cursor-pointer text-3xl"
-              variant={"ghost"}
-              asChild
-              onClick={() => {
-                router.push(el.redirect);
-              }}
-            >
-              <div>{el.name}</div>
-            </Button>
-          ))}
+          <Button
+            variant={"ghost"}
+            className="border rounded-lg p-16 cursor-pointer text-3xl"
+            asChild
+          >
+            <Link href={"/fight"}>Fight</Link>
+          </Button>
+          <BrothelButton
+            getPlayerBrothelCooldownQuery={getPlayerBrothelCooldownQuery}
+          />
+          <Button
+            variant={"ghost"}
+            className="border rounded-lg p-16 cursor-pointer text-3xl"
+            asChild
+          >
+            <Link href={"/shop"}>Shop</Link>
+          </Button>
         </motion.div>
       </div>
     </div>

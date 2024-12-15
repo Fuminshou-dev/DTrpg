@@ -31,18 +31,23 @@ export default function BrothelPage() {
       <LoadingSpinner className="size-72"></LoadingSpinner>
     </div>
   ) : (
-    <div className="container mx-auto">
-      <div className="flex flex-col gap-4 p-8 w-full h-full justify-center items-center">
-        <Button onClick={() => redirect("/main")}>Return to main menu</Button>
-        <div className="flex flex-col items-center w-full gap-8">
-          <div className={"grid grid-cols-3 gap-4"}>
+    <div className="flex justify-center items-center h-screen container mx-auto">
+      <Button
+        className="fixed top-12 right-12"
+        onClick={() => redirect("/main")}
+      >
+        Return to main menu
+      </Button>
+      <div className="flex flex-col justify-center items-center gap-2">
+        <div className="flex flex-col justfy-center gap-4">
+          <div className={"grid grid-cols-3 gap-2"}>
             {shuffledCustomers?.map((customer) => (
               <div
-                className="flex justify-center items-center border rounded-lg size-72 "
+                className="flex justify-center h-fit items-center border rounded-lg"
                 key={customer._id}
               >
-                <div className="flex flex-col justify-center items-center gap-12">
-                  <p className="text-3xl underline underline-offset-8 mb-5">
+                <div className="flex flex-col justify-center items-center gap-4 p-4">
+                  <p className="text-3xl underline underline-offset-8 mb-4">
                     {customer.customerType} customer
                   </p>
                   <div className="flex flex-col text-xl justify-center items-center text-center">
@@ -82,7 +87,7 @@ export default function BrothelPage() {
               </div>
             ))}
           </div>
-          <div className="border rounded-lg w-1/2  flex flex-col justify-center items-center p-8">
+          <div className="border rounded-lg w-full  flex flex-col justify-center items-center p-8">
             <h1 className="text-3xl">Possible tasks:</h1>
             <ul className="flex-col gap-4 justify-center items-center list-disc list-item">
               {allBrothelTasks?.map((el) => (
@@ -94,7 +99,7 @@ export default function BrothelPage() {
             </ul>
           </div>
         </div>
-        <div className="flex justify-center items-center p-8">
+        <div className="flex justify-center items-center">
           <Button className="w-24 h-12" asChild>
             <Link href={"/brothel/serve"}>Serve</Link>
           </Button>

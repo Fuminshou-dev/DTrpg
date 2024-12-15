@@ -276,3 +276,15 @@ export const getPlayerFightStatus = query({
     return player.fightStatus;
   },
 });
+
+export const getPlayerBrothelCooldown = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const player = await ctx.db
+      .query("players")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .first();
+
+    return player?.brothelCooldownUntil || 0;
+  },
+});
