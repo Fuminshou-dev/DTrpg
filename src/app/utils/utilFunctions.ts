@@ -1,5 +1,7 @@
-import { Doc } from "../../../convex/_generated/dataModel";
+import { useMutation } from "convex/react";
+import { Doc, Id } from "../../../convex/_generated/dataModel";
 import { ATK_MULTIPLIER } from "./constants";
+import { api } from "../../../convex/_generated/api";
 
 export const getRandomTask = ({ monster }: { monster: Doc<"monsters"> }) => {
   const randomTask =
@@ -27,3 +29,76 @@ export const calculateMonsterDmg = ({
   );
   return monsterDmg;
 };
+
+export async function updatePlayerFightStatus({
+  updatePlayerFightStatusMutation,
+  playerStats,
+  monster,
+  playerAtk,
+  monsterId,
+  updatePlayerAfterDefeatingAMonster,
+  monsterHp,
+  playerHp,
+  playerId,
+  resetPlayerMutation,
+  monsterAtk,
+  finalDmg,
+}: {
+  updatePlayerFightStatusMutation: ReturnType<
+    typeof useMutation<typeof api.players.updatePlayerFightStatus>
+  >;
+  resetPlayerMutation: ReturnType<
+    typeof useMutation<typeof api.players.resetPlayer>
+  >;
+  playerStats: Doc<"player_stats">;
+  monster: Doc<"monsters">;
+  playerAtk: number;
+  updatePlayerAfterDefeatingAMonster: ReturnType<
+    typeof useMutation<typeof api.players.updatePlayerAfterDefeatingAMonster>
+  >;
+  monsterId: number;
+  monsterHp: number;
+  playerId: Id<"players">;
+  playerHp: number;
+  finalDmg: number;
+  monsterAtk: number;
+}) {
+  const newAtkMultipler = getRandomAtkMultiplier();
+  const newRandomTask = getRandomTask({ monster });
+  const newFinalDmg = calculateFinalDmg(playerStats.atk, newAtkMultipler);
+  const newMonsterAtk = calculateMonsterDmg({ monster });
+
+  // check if the player is dead
+
+  if (playerHp - monsterAtk <= 0) {
+    return await resetPlayerMutation({ playerId });
+  }
+
+  // check if monster is dead
+
+  if (monsterHp - finalDmg <= 0) {
+    await updatePlayerFightStatusMutation({
+      fightStatus: "idle",
+    });
+    await updatePlayerAfterDefeatingAMonster({
+      earnedExp: monster.exp,
+      earnedGold: monster.gold,
+      monsterId: monsterId,
+    });
+    return;
+  }
+
+  await updatePlayerFightStatusMutation({
+    fightStatus: {
+      status: "fighting",
+      monsterHp: monsterHp - finalDmg,
+      playerHp: playerHp - monsterAtk,
+      monsterId: monsterId,
+      atkMultiplier: newAtkMultipler,
+      currentTask: newRandomTask,
+      finalDmg: newFinalDmg,
+      monsterAtk: newMonsterAtk,
+      playerAtk: playerAtk,
+    },
+  });
+}

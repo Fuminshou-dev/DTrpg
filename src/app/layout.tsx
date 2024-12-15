@@ -4,7 +4,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
 import { ModeToggle } from "./theme-toggle";
-import { Button } from "@/components/ui/button";
 
 const myFont = localFont({
   // src: "../public/fonts/font.ttf",
@@ -12,8 +11,8 @@ const myFont = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "DP RPG",
-  description: "DP RPG GAME",
+  title: "DT RPG",
+  description: "DT RPG GAME",
 };
 
 export default function RootLayout({
@@ -25,11 +24,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${myFont.className}  antialiased`}>
         <Providers>
-          {children}
-          <div className="fixed top-24 left-6">
+          <div className="fixed z-50 top-24 left-6">
             <ModeToggle />
           </div>
           <CustomSignOutButton />
+          {children}
         </Providers>
       </body>
     </html>

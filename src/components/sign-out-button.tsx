@@ -7,7 +7,7 @@ import { SignOutButton } from "@clerk/nextjs";
 export default function CustomSignOutButton() {
   return (
     <Authenticated>
-      <Button asChild className="fixed top-6 left-6 h-12 w-20">
+      <Button asChild className="fixed top-6 left-6 h-12 w-20 z-50">
         <SignOutButton redirectUrl="/login" />
       </Button>
     </Authenticated>

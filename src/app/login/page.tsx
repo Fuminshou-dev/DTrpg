@@ -4,6 +4,7 @@ import { SignInButton, SignUpButton, useUser } from "@clerk/nextjs";
 import { Unauthenticated, useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
+import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,18 +23,21 @@ export default function LoginPage() {
 
   // Show login/signup buttons if not signed in
   return (
-    <div className="flex h-screen justify-center items-center">
+    <div className="flex flex-col gap-8 container mx-auto h-screen justify-center items-center">
+      <h1 className="text-5xl font-bold">
+        Please, log in or create an account (character){" "}
+      </h1>
       <Unauthenticated>
         <div className="flex gap-4">
           <SignInButton forceRedirectUrl={"/main"} mode="modal">
-            <button className="px-4 py-2 bg-blue-500 text-white rounded">
-              Sign In
-            </button>
+            <Button variant={"outline"} className="w-24 h-12 ">
+              <p className="text-blue-500">Sign In</p>
+            </Button>
           </SignInButton>
           <SignUpButton forceRedirectUrl={"/main"} mode="modal">
-            <button className="px-4 py-2 bg-green-500 text-white rounded">
-              Sign Up
-            </button>
+            <Button variant={"outline"} className="w-24 h-12">
+              <p className="text-green-500">Sign Up</p>
+            </Button>
           </SignUpButton>
         </div>
       </Unauthenticated>

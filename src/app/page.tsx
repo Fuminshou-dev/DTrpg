@@ -32,10 +32,11 @@ const githubIcon = (
   </svg>
 );
 export default function Home() {
-  const [isAdult, setIsAdult] = useState(true);
-  const [isExplainRules, setExplainRules] = useState(false);
   const { isSignedIn } = useAuth();
+
+  const [isExplainRules, setExplainRules] = useState(false);
   const router = useRouter();
+  const [isAdult, setIsAdult] = useState(false);
 
   useEffect(() => {
     if (!isSignedIn) {
@@ -44,39 +45,42 @@ export default function Home() {
     if (isSignedIn) {
       setIsAdult(true);
     }
-  }, [isSignedIn]);
+  }, [isSignedIn, setIsAdult]);
 
   return (
-    <div className="h-screen container mx-auto ">
-      <Link href={"https://github.com/Fuminshou-dev/dprpg"}>
-        <div className="flex size-12 rounded-lg  p-4 border border-blue-500 border-spacing-12 bg-white">
+    <div className="h-screen w-screen container mx-auto relative">
+      <Link
+        target="_blank"
+        rel="noopener noreferrer"
+        href={"https://github.com/Fuminshou-dev/dprpg"}
+        className="absolute top-4 right-4 z-10"
+      >
+        <div className="size-12 rounded-lg p-4 border border-black border-spacing-12 dark:bg-white">
           {githubIcon}
         </div>
       </Link>
-      <div>
-        <AlertDialog defaultOpen={false} open={!isAdult}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are 18+?</AlertDialogTitle>
-              <AlertDialogDescription>
-                The content on this page is for adults only.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel asChild>
-                <Link href="https://google.com/">Leave</Link>
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  setIsAdult(true);
-                }}
-              >
-                I am 18+
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
+      <AlertDialog defaultOpen={true} open={!isAdult}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you 18 or older?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The content on this page is for adults only.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel asChild>
+              <Link href="https://google.com/">Leave</Link>
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setIsAdult(true);
+              }}
+            >
+              I am 18 or older
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <div
         className={
           isAdult
@@ -84,52 +88,108 @@ export default function Home() {
             : "blur h-screen flex flex-col justify-center items-center gap-8"
         }
       >
-        <div className="flex flex-col gap-8 justify-center items-center text-center">
-          <h1 className="text-5xl">DP RPG GAME</h1>
+        <div className="flex flex-col gap-8 justify-center items-center text-center tracking-tighter ">
+          <h1 className="text-5xl">DT RPG GAME</h1>
           <h2 className="text-2xl">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusantium
-            eveniet a expedita quos consequuntur quae? Eligendi enim at,
-            voluptatibus, tenetur nihil iure voluptatum eum incidunt beatae
-            inventore blanditiis, autem reprehenderit ad dicta explicabo error
-            facere saepe fugit dolorum itaque ullam accusamus cumque? Voluptatem
-            possimus ad facere cumque est, delectus rerum?
+            Monsters are attacking! Over 100 years have passed since the{" "}
+            <span className="text-red-500">Demon Queen</span> was defeated by
+            the <span className="text-yellow-200">Hero</span>. Now, the world is
+            once again on the brink of falling into
+            <span className="text-gray-200 italic"> darkness</span>. You are a
+            descendant of the <span className="text-yellow-200">Hero</span> who
+            vanquished the <span className="text-red-500">Demon Queen</span> a
+            century ago, and you have inherited his{" "}
+            <span className="font-bold">special power</span>. It allows you to
+            incapacitate monsters by making them ejaculate with your throat. The
+            monsters are now trying to summon an{" "}
+            <span className="text-red-500 italic">evil deity</span> to solidify
+            their control over the world. Defeat the{" "}
+            <span className="text-red-500">Dark Priest</span> and stop the
+            summoning of the <span className="text-red-500">evil deity</span>.
           </h2>
+          <h3 className="text-3xl">
+            Only <span className="font-bold italic">you</span> can save the
+            world.
+          </h3>
         </div>
-        <Button size={"lg"} onClick={() => setExplainRules(true)}>
-          Start game
+        <Button
+          variant={"secondary"}
+          size={"lg"}
+          onClick={() => setExplainRules(true)}
+        >
+          Start the game
         </Button>
       </div>
-      <div>
-        <AlertDialog open={isExplainRules}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>The rules of the game</AlertDialogTitle>
-              <AlertDialogDescription>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam,
-                quo tempore doloremque eos necessitatibus, numquam culpa
-                voluptates voluptate ab odio natus, sit accusamus consequuntur
-                illo ipsa velit veniam nihil! Nulla sit distinctio maiores eum
-                dolorum fugiat architecto? Error nemo cupiditate ullam aut
-                cumque sapiente voluptas similique eligendi laborum? Nobis,
-                assumenda?
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setExplainRules(false)}>
-                Go back
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  setExplainRules(false);
-                  router.push("/main");
-                }}
-              >
-                Got it, let's go.
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
+      <AlertDialog open={isExplainRules}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>The rules of the game</AlertDialogTitle>
+            <AlertDialogDescription className="flex flex-col gap-2 text-center">
+              <span className="text-xl">Your goal</span>
+              <span className="text">
+                Your goal is to defeat the{" "}
+                <span className="text-red-500">Dark Priest</span> and stop the
+                summoning of the{" "}
+                <span className="text-red-500">evil deity</span>. Defeat
+                monsters, level up, and aim to bring down the{" "}
+                <span className="text-red-500">Dark Priest</span>.
+              </span>
+              <span className="text-xl">Battle</span>
+              <span>
+                In battle, if you reduce the monster's{" "}
+                <span className="text-blue-500">HP</span> to zero before your
+                own <span className="text-blue-500">HP</span> reaches zero,{" "}
+                <span className="text-green-500">you win</span>. Battles always
+                start with both the monster and you at full{" "}
+                <span className="text-blue-500">HP</span>. After winning a
+                battle, you will gain{" "}
+                <span className="text-purple-500">EXP</span> and{" "}
+                <span className="text-yellow-400">Gold</span> (currency) based
+                on the monster you defeated. Once you earn enough{" "}
+                <span className="text-purple-500">EXP</span>, you will level up,
+                and your <span className="text-blue-500">HP</span> and base
+                attack power will increase. <br />
+                <span>
+                  You can battle any monster you've defeated as many times as
+                  you like. If an enemy is too strong to defeat, fight
+                  previously defeated monsters to level up.
+                </span>
+              </span>
+              <span className="text-xl">Shop</span>
+              <span>
+                In the shop, you can buy items that will aid you in battle. You
+                can earn <span className="text-yellow-400">money</span> by
+                defeating monsters or working at the brothel. Brothel In the
+                brothel, unlike in battle, you won't gain experience points, but
+                you can earn more <span className="text-yellow-400">money</span>{" "}
+                than you would from battle. You can work at the brothel as many
+                times as you like during your adventure.
+              </span>
+              <span className="text-xl">Brothel</span>
+              <span>
+                In the brothel, unlike in battle, you won't gain{" "}
+                <span className="text-purple-500">EXP</span>, but you can earn
+                more <span className="text-yellow-400">Gold</span> than you
+                would from battle. You can work at the brothel as many times as
+                you like during your adventure.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setExplainRules(false)}>
+              Go back
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setExplainRules(false);
+                router.push("/main");
+              }}
+            >
+              Got it, let's go.
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
