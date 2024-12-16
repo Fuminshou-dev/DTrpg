@@ -25,10 +25,30 @@ export default function ShopPage() {
   const [successItemType, setSuccessItemType] = useState<string | null>(null);
 
   const items = useQuery(api.shop.getAllShopItems);
+  const updateShopStatisticsMutation = useMutation(
+    api.player_statistics.updateShopStatistics
+  );
+  const updateGoldStatisticsMutation = useMutation(
+    api.player_statistics.updateGoldStatistics
+  );
   const router = useRouter();
   const player = useQuery(api.players.getPlayer);
   const buyItem = useMutation(api.shop.buyItem);
-  const handleItemBuy = async (price: number, type: string) => {
+  const handleItemBuy = async ({
+    price,
+    type,
+    updateShopStatisticsMutation,
+    updateGoldStatisticsMutation,
+  }: {
+    price: number;
+    type: string;
+    updateShopStatisticsMutation: ReturnType<
+      typeof useMutation<typeof api.player_statistics.updateShopStatistics>
+    >;
+    updateGoldStatisticsMutation: ReturnType<
+      typeof useMutation<typeof api.player_statistics.updateGoldStatistics>
+    >;
+  }) => {
     const result = await buyItem({ price, type });
 
     if (!result.success) {
@@ -38,6 +58,20 @@ export default function ShopPage() {
     }
 
     if (result.success) {
+      await updateShopStatisticsMutation({
+        toUpdate: {
+          healingHiPotionsBought: type === "restore2",
+          healingPotionsBought: type === "restore1",
+          rerollPotionsBought: type === "reroll",
+          specialPotionsBought: type === "special",
+        },
+      });
+      await updateGoldStatisticsMutation({
+        toUpdate: {
+          goldSpent: price,
+          goldEarned: 0,
+        },
+      });
       setSuccessItemType(type);
     }
   };
@@ -101,7 +135,14 @@ export default function ShopPage() {
               <div className="flex flex-col justify-center items-center gap-2">
                 <Button
                   disabled={player.gold < item.price ? true : false}
-                  onClick={() => handleItemBuy(item.price, item.type)}
+                  onClick={() =>
+                    handleItemBuy({
+                      updateGoldStatisticsMutation,
+                      price: item.price,
+                      type: item.type,
+                      updateShopStatisticsMutation,
+                    })
+                  }
                   variant={
                     player.gold < item.price ? "destructive" : "secondary"
                   }

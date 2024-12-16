@@ -23,6 +23,9 @@ export default function ServePage() {
   const updateBrothelStatisticsMutation = useMutation(
     api.player_statistics.updateBrothelStatistics
   );
+  const updateGoldStatisticsMutation = useMutation(
+    api.player_statistics.updateGoldStatistics
+  );
 
   if (!player) {
     return (
@@ -50,6 +53,7 @@ export default function ServePage() {
       ) : (
         <div className={showEarnedGold ? "blur" : "flex flex-col gap-8"}>
           <BrothelSuccessTaskDialog
+            updateGoldStatisticsMutation={updateGoldStatisticsMutation}
             updateBrothelStatisticsMutation={updateBrothelStatisticsMutation}
             updateGoldMutation={updateGoldMutation}
             earnedGold={earnedGold}

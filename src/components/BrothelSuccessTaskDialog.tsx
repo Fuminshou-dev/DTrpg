@@ -20,6 +20,7 @@ export function BrothelSuccessTaskDialog({
   updateGoldMutation,
   player,
   updateBrothelStatisticsMutation,
+  updateGoldStatisticsMutation,
 }: {
   showEarnedGold: boolean;
   earnedGold: number;
@@ -31,6 +32,9 @@ export function BrothelSuccessTaskDialog({
   updateBrothelStatisticsMutation: ReturnType<
     typeof useMutation<typeof api.player_statistics.updateBrothelStatistics>
   >;
+  updateGoldStatisticsMutation: ReturnType<
+    typeof useMutation<typeof api.player_statistics.updateGoldStatistics>
+  >;
 }) {
   const router = useRouter();
 
@@ -39,6 +43,12 @@ export function BrothelSuccessTaskDialog({
     await updateBrothelStatisticsMutation({
       toUpdate: {
         totalBrothelTaskCompleted: true,
+      },
+    });
+    await updateGoldStatisticsMutation({
+      toUpdate: {
+        goldSpent: 0,
+        goldEarned: earnedGold,
       },
     });
     setShowEarnedGold(false);
