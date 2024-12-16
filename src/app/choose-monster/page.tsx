@@ -28,6 +28,7 @@ import {
   getRandomAtkMultiplier,
   getRandomTask,
 } from "../utils/utilFunctions";
+import { Doc } from "../../../convex/_generated/dataModel";
 
 export default function FightPage() {
   const router = useRouter();
@@ -42,10 +43,6 @@ export default function FightPage() {
     level: player?.level ?? 1,
   });
 
-  const updatePlayerCombatStatisticsMutation = useMutation(
-    api.player_statistics.updatePlayerCombatStatistics
-  );
-
   const atkMultiplier = getRandomAtkMultiplier();
 
   if (
@@ -59,6 +56,32 @@ export default function FightPage() {
       </div>
     );
   }
+
+  const handleChooseMonster = async (monster: Doc<"monsters">) => {
+    const finalDmg = calculateFinalDmg({
+      atkMultiplier: atkMultiplier,
+      playerAtk: playerStats?.atk ?? 0,
+      hasSpecialPotionEffect: player.hasSpecialPotionEffect,
+    });
+    const monsterAtk = calculateMonsterDmg({ monster });
+
+    await updatePlayerFightStatus({
+      fightStatus: {
+        status: "fighting",
+        atkMultiplier: atkMultiplier,
+        currentTask: getRandomTask({ monster }),
+        finalDmg: finalDmg,
+        monsterAtk,
+        monsterHp: monster.hp,
+        monsterId: monster.showId,
+        playerAtk: playerStats?.atk ?? 0,
+        playerHp: playerStats?.hp ?? 0,
+      },
+    });
+    router.push(`/fight/`);
+    setMonsterToConfirm(null);
+  };
+
   return (
     <div className="flex flex-col h-screen items-center container mx-auto">
       <Button className="p-4 text-sm m-8" onClick={() => router.push("/main")}>
@@ -157,35 +180,8 @@ export default function FightPage() {
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={async () => {
-                          const finalDmg = calculateFinalDmg({
-                            atkMultiplier: atkMultiplier,
-                            playerAtk: playerStats?.atk ?? 0,
-                            hasSpecialPotionEffect:
-                              player.hasSpecialPotionEffect,
-                          });
-                          const monsterAtk = calculateMonsterDmg({ monster });
-
-                          await updatePlayerFightStatus({
-                            fightStatus: {
-                              status: "fighting",
-                              atkMultiplier: atkMultiplier,
-                              currentTask: getRandomTask({ monster }),
-                              finalDmg: finalDmg,
-                              monsterAtk,
-                              monsterHp: monster.hp,
-                              monsterId: monster.showId,
-                              playerAtk: playerStats?.atk ?? 0,
-                              playerHp: playerStats?.hp ?? 0,
-                            },
-                          });
-                          await updatePlayerCombatStatisticsMutation({
-                            toUpdate: {
-                              totalCombatTasks: true,
-                            },
-                          });
-                          router.push(`/fight/`);
-                          setMonsterToConfirm(null);
+                        onClick={() => {
+                          handleChooseMonster(monster);
                         }}
                       >
                         Start Fight

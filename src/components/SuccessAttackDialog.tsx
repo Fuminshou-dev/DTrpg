@@ -21,6 +21,7 @@ import {
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Doc } from "../../convex/_generated/dataModel";
+import React from "react";
 
 export default function SuccessAttackDialog({
   playerHp,
@@ -38,6 +39,9 @@ export default function SuccessAttackDialog({
   setIsLastBossDead,
   setIsMonsterDead,
   updatePlayerFightStatusMutation,
+  updatePlayerCombatStatisticsMutation,
+  updatePlayerMonstersStatisticsMutation,
+  updatePlayerGoldMutation,
 }: {
   playerHp: number;
   monsterHp: number;
@@ -56,7 +60,78 @@ export default function SuccessAttackDialog({
   setIsPlayerDead: (value: boolean) => void;
   hasSpecialPotionEffect: boolean;
   setIsLastBossDead: (value: boolean) => void;
+  updatePlayerCombatStatisticsMutation: ReturnType<
+    typeof useMutation<
+      typeof api.player_statistics.updatePlayerCombatStatistics
+    >
+  >;
+  updatePlayerGoldMutation: ReturnType<
+    typeof useMutation<typeof api.player_statistics.updateGoldStatistics>
+  >;
+  updatePlayerMonstersStatisticsMutation: ReturnType<
+    typeof useMutation<
+      typeof api.player_statistics.updatePlayerMonstersStatistics
+    >
+  >;
 }) {
+  const handleSuccessAttack = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    button.textContent = "Loading...";
+
+    setTimeout(async () => {
+      setShowSuccessAttackDialog(false);
+      const { status } = await updatePlayerFightStatus({
+        hasSpecialPotionEffect,
+        updatePlayerFightStatusMutation,
+        playerHp,
+        monsterHp,
+        monsterAtk,
+        finalDmg,
+        monster,
+        playerStats,
+        monsterId,
+        playerAtk,
+      });
+      if (status === "player_dead") {
+        setIsPlayerDead(true);
+      }
+      if (status === "monster_dead" && monster.monster_type !== "Evil Deity") {
+        await updatePlayerMonstersStatisticsMutation({
+          toUpdate: {
+            monsterKilled: monster.monster_type,
+          },
+        });
+        await updatePlayerGoldMutation({
+          toUpdate: {
+            goldSpent: 0,
+            goldEarned: monster.gold,
+          },
+        });
+        setIsMonsterDead(true);
+      }
+      if (status === "monster_dead" && monster.monster_type === "Evil Deity") {
+        await updatePlayerMonstersStatisticsMutation({
+          toUpdate: {
+            monsterKilled: monster.monster_type,
+          },
+        });
+        setIsLastBossDead(true);
+      }
+
+      await updatePlayerCombatStatisticsMutation({
+        toUpdate: {
+          totalCombatTasks: true,
+          totalCombatTasksCompleted: true,
+          totalDamageTaken: monsterAtk,
+          totalDamageDealt: finalDmg,
+        },
+      });
+    }, 3000);
+  };
+
   return (
     <AlertDialog open={showSuccessAttackDialog}>
       <AlertDialogContent>
@@ -123,44 +198,7 @@ export default function SuccessAttackDialog({
             Cancel
           </AlertDialogCancel>
 
-          <AlertDialogAction
-            onClick={(event) => {
-              const button = event.currentTarget;
-              button.disabled = true;
-              button.textContent = "Loading...";
-
-              setTimeout(async () => {
-                setShowSuccessAttackDialog(false);
-                const { status } = await updatePlayerFightStatus({
-                  hasSpecialPotionEffect,
-                  updatePlayerFightStatusMutation,
-                  playerHp,
-                  monsterHp,
-                  monsterAtk,
-                  finalDmg,
-                  monster,
-                  playerStats,
-                  monsterId,
-                  playerAtk,
-                });
-                if (status === "player_dead") {
-                  setIsPlayerDead(true);
-                }
-                if (
-                  status === "monster_dead" &&
-                  monster.monster_type !== "Evil Deity"
-                ) {
-                  setIsMonsterDead(true);
-                }
-                if (
-                  status === "monster_dead" &&
-                  monster.monster_type === "Evil Deity"
-                ) {
-                  setIsLastBossDead(true);
-                }
-              }, 3000);
-            }}
-          >
+          <AlertDialogAction onClick={handleSuccessAttack}>
             Continue
           </AlertDialogAction>
         </AlertDialogFooter>

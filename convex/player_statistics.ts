@@ -280,3 +280,63 @@ export const updatePlayerCombatStatistics = mutation({
     }
   },
 });
+
+export const updatePlayerMonstersStatistics = mutation({
+  args: {
+    toUpdate: v.object({
+      monsterKilled: v.string(),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthorized");
+    }
+    const userId = identity.subject;
+    const player = await ctx.db
+      .query("players")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!player) {
+      throw new Error("Player not found");
+    }
+    const playerSpecificStats = await ctx.db
+      .query("player_statistics")
+      .withIndex("by_playerId", (q) => q.eq("playerId", player._id))
+      .first();
+
+    if (!playerSpecificStats) {
+      throw new Error("Player statistics not found");
+    }
+
+    playerSpecificStats.monsters.totalMonstersDefeated++;
+
+    // Update monster-specific statistics
+    const monsterTypeMap: {
+      [
+        key: string
+      ]: keyof typeof playerSpecificStats.monsters.monsterSpecificStats;
+    } = {
+      "Evil Deity": "diety",
+      "Dark Priest": "priest",
+      "Nine-tailed fox": "fox",
+      Vampire: "vampire",
+      Minotaur: "minotaur",
+      Werewolf: "werewolf",
+      Goblin: "goblin",
+    };
+
+    const monsterType = monsterTypeMap[args.toUpdate.monsterKilled];
+    if (
+      monsterType &&
+      monsterType in playerSpecificStats.monsters.monsterSpecificStats
+    ) {
+      playerSpecificStats.monsters.monsterSpecificStats[monsterType]++;
+    }
+
+    await ctx.db.patch(playerSpecificStats._id, {
+      monsters: playerSpecificStats.monsters,
+    });
+  },
+});

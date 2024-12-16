@@ -24,6 +24,7 @@ import { Doc } from "../../convex/_generated/dataModel";
 
 export default function FailDialog({
   showFailAttackDialog,
+  hasSpecialPotionEffect,
   playerHp,
   monsterHp,
   monsterAtk,
@@ -34,6 +35,7 @@ export default function FailDialog({
   setShowFailAttackDialog,
   setIsPlayerDead,
   updatePlayerFightStatusMutation,
+  updatePlayerCombatStatisticsMutation,
 }: {
   showFailAttackDialog: boolean;
   playerHp: number;
@@ -47,8 +49,46 @@ export default function FailDialog({
   updatePlayerFightStatusMutation: ReturnType<
     typeof useMutation<typeof api.players.updatePlayerFightStatus>
   >;
+  hasSpecialPotionEffect: boolean;
   setIsPlayerDead: (value: boolean) => void;
+  updatePlayerCombatStatisticsMutation: ReturnType<
+    typeof useMutation<
+      typeof api.player_statistics.updatePlayerCombatStatistics
+    >
+  >;
 }) {
+  const handleFailedAttack = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    button.textContent = "Loading...";
+
+    setTimeout(async () => {
+      setShowFailAttackDialog(false);
+      const { status } = await updatePlayerFightStatus({
+        hasSpecialPotionEffect,
+        updatePlayerFightStatusMutation,
+        playerHp,
+        monsterHp,
+        monsterAtk,
+        finalDmg: 0,
+        monster,
+        playerStats,
+        monsterId,
+        playerAtk,
+      });
+      if (status === "player_dead") {
+        setIsPlayerDead(true);
+      }
+      await updatePlayerCombatStatisticsMutation({
+        toUpdate: {
+          totalCombatTasks: true,
+          totalCombatTasksFailed: true,
+          totalDamageTaken: monsterAtk,
+        },
+      });
+    }, 3000);
+  };
+
   return (
     <AlertDialog open={showFailAttackDialog}>
       <AlertDialogContent>
@@ -110,32 +150,7 @@ export default function FailDialog({
           >
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={(event) => {
-              const button = event.currentTarget;
-              button.disabled = true;
-              button.textContent = "Loading...";
-
-              setTimeout(async () => {
-                setShowFailAttackDialog(false);
-                // run the task failure function here
-                const { status } = await updatePlayerFightStatus({
-                  updatePlayerFightStatusMutation,
-                  playerHp,
-                  monsterHp,
-                  monsterAtk,
-                  finalDmg: 0,
-                  monster,
-                  playerStats,
-                  monsterId,
-                  playerAtk,
-                });
-                if (status === "player_dead") {
-                  setIsPlayerDead(true);
-                }
-              }, 3000);
-            }}
-          >
+          <AlertDialogAction onClick={handleFailedAttack}>
             Continue
           </AlertDialogAction>
         </AlertDialogFooter>

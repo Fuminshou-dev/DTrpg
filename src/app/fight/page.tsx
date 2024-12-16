@@ -1,5 +1,6 @@
 "use client";
 import ErrorDialog from "@/components/ErrorDialog";
+import EvilDeityVictoryScreen from "@/components/EvilDeityVictoryScreen";
 import FailDialog from "@/components/FailAttackDialog";
 import MonsterDeadDialog from "@/components/MonsterDeadDialog";
 import PlayerDeadDialog from "@/components/PlayerDeadDialog";
@@ -7,7 +8,14 @@ import SuccessAttackDialog from "@/components/SuccessAttackDialog";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Progress } from "@/components/ui/progress";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useMutation, useQuery } from "convex/react";
+import Image from "next/image";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import {
@@ -20,22 +28,25 @@ import {
   calculateHealAmount,
   updatePlayerFightStatus,
 } from "../utils/utilFunctions";
-import EvilDeityVictoryScreen from "@/components/EvilDeityVictoryScreen";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import Image from "next/image";
 
 // TODO: implement victory screen if monsterId = 6 ( EVIL DEITY )
 
 export default function MonsterFightPage() {
   const player = useQuery(api.players.getPlayer);
+  const [showFailAttackDialog, setShowFailAttackDialog] = useState(false);
+  const [showSuccessAttackDialog, setShowSuccessAttackDialog] = useState(false);
+  const [isPlayerDead, setIsPlayedDead] = useState(false);
+  const [isMonsterDead, setIsMonsterDead] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [isLastBossDead, setIsLastBossDead] = useState(false);
+  const [showItems, setShowItems] = useState(true);
+  const playerLevel = player?.level ?? 0;
+
   const updatePlayerAfterDefeatingAMonsterMutation = useMutation(
     api.players.updatePlayerAfterDefeatingAMonster
   );
+
   const updatePlayerFightStatusMutation = useMutation(
     api.players.updatePlayerFightStatus
   );
@@ -46,15 +57,16 @@ export default function MonsterFightPage() {
   const updatePlayerPotionStatisticsMutation = useMutation(
     api.player_statistics.updatePlayerPotionStatistics
   );
-  const [showFailAttackDialog, setShowFailAttackDialog] = useState(false);
-  const [showSuccessAttackDialog, setShowSuccessAttackDialog] = useState(false);
-  const [isPlayerDead, setIsPlayedDead] = useState(false);
-  const [isMonsterDead, setIsMonsterDead] = useState(false);
-  const [showError, setShowError] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [isLastBossDead, setIsLastBossDead] = useState(false);
-  const [showItems, setShowItems] = useState(true);
-  const playerLevel = player?.level ?? 0;
+  const updatePlayerCombatStatisticsMutation = useMutation(
+    api.player_statistics.updatePlayerCombatStatistics
+  );
+  const updatePlayerMonstersStatisticsMutation = useMutation(
+    api.player_statistics.updatePlayerMonstersStatistics
+  );
+
+  const updatePlayerGoldMutation = useMutation(
+    api.player_statistics.updateGoldStatistics
+  );
 
   const levelStats = useQuery(api.player_stats.getLevelStats, {
     level: playerLevel,
@@ -235,6 +247,13 @@ export default function MonsterFightPage() {
           setIsPlayerDead={setIsPlayedDead}
         />
         <SuccessAttackDialog
+          updatePlayerGoldMutation={updatePlayerGoldMutation}
+          updatePlayerMonstersStatisticsMutation={
+            updatePlayerMonstersStatisticsMutation
+          }
+          updatePlayerCombatStatisticsMutation={
+            updatePlayerCombatStatisticsMutation
+          }
           setIsLastBossDead={setIsLastBossDead}
           hasSpecialPotionEffect={player.hasSpecialPotionEffect}
           setIsMonsterDead={setIsMonsterDead}
@@ -252,7 +271,11 @@ export default function MonsterFightPage() {
           monsterAtk={monsterAtk ?? 0}
         />
         <FailDialog
+          updatePlayerCombatStatisticsMutation={
+            updatePlayerCombatStatisticsMutation
+          }
           setIsPlayerDead={setIsPlayedDead}
+          hasSpecialPotionEffect={player.hasSpecialPotionEffect}
           monster={currentMonster}
           monsterId={currentMonster.showId}
           playerAtk={playerAtk ?? 0}
