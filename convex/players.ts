@@ -53,7 +53,50 @@ export const createPlayer = mutation({
       currentMonster: 0,
     });
 
-    return player;
+    const player_statistics = await ctx.db.insert("player_statistics", {
+      playerId: player,
+      gold: {
+        totalEarned: 0,
+        totalSpent: 0,
+      },
+      monsters: {
+        totalMonstersDefeated: 0,
+        monsterSpecificStats: {
+          goblin: 0,
+          werewolf: 0,
+          minotaur: 0,
+          vampire: 0,
+          fox: 0,
+          priest: 0,
+          diety: 0,
+        },
+      },
+      combat: {
+        totalCombatTasks: 0,
+        totalDamageDealt: 0,
+        totalDamageTaken: 0,
+        totalCombatTasksCompleted: 0,
+        totalCombatTasksFailed: 0,
+      },
+      brothel: {
+        totalBrothelTasks: 0,
+        totalBrothelTasksCompleted: 0,
+        totalBrothelTasksFailed: 0,
+      },
+      potions: {
+        totalPotionsBought: 0,
+        totalHealingPotionsBought: 0,
+        totalHealingHiPotionsBought: 0,
+        totalRerollPotionsBought: 0,
+        totalSpecialPotionsBought: 0,
+        totalHealingpotionsUsed: 0,
+        totalHealingHiPotionsUsed: 0,
+        totalRerollPotionsUsed: 0,
+        totalSpecialPotionsUsed: 0,
+      },
+    });
+
+    return { player: player, player_statistics: player_statistics };
   },
 });
 
@@ -148,7 +191,7 @@ export const updatePlayerAfterDefeatingAMonster = mutation({
       });
     }
 
-    if (newPlayerExp > nextLevelStats.required_exp) {
+    if (newPlayerExp >= nextLevelStats.required_exp) {
       await ctx.db.patch(player._id, {
         level: player.level + 1,
         current_exp: newPlayerExp,
@@ -156,7 +199,7 @@ export const updatePlayerAfterDefeatingAMonster = mutation({
     }
     await ctx.db.patch(player._id, {
       gold: newPlayerGold,
-      current_exp: newPlayerExp,
+      current_exp: newPlayerExp < 543 ? newPlayerExp : 543,
       fightStatus: "idle",
       hasSpecialPotionEffect: false,
     });
@@ -180,7 +223,7 @@ export const resetPlayer = mutation({
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.playerId, {
-      brothelCooldownUntil: 0,
+      brothelCooldownUntil: undefined,
       hasSpecialPotionEffect: false,
       gold: 0,
       current_exp: 0,

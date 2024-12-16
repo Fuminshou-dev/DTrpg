@@ -18,7 +18,7 @@ export const itemImages: { [key: string]: StaticImageData } = {
 };
 export const ItemDescriptions: { [key: string]: string } = {
   restore1: "Restores half of your hp",
-  restore2: "restores full hp",
+  restore2: "Restores full hp",
   special: "Doubles the experience gained and damage dealt in the next battle",
   reroll: "Allows you to rerrol current roll",
 };

@@ -16,17 +16,26 @@ export function BrothelFailTaskDialog({
   showFailTaskDialog,
   setShowFailTaskDialog,
   setBrothelCooldownMutation,
+  updateBrothelStatisticsMutation,
 }: {
   showFailTaskDialog: boolean;
   setShowFailTaskDialog: (value: boolean) => void;
   setBrothelCooldownMutation: ReturnType<
     typeof useMutation<typeof api.customers.setBrothelCooldown>
   >;
+  updateBrothelStatisticsMutation: ReturnType<
+    typeof useMutation<typeof api.player_statistics.updateBrothelStatistics>
+  >;
 }) {
   const router = useRouter();
-  const handleCloseDialog = () => {
+  const handleCloseDialog = async () => {
+    await setBrothelCooldownMutation();
+    await updateBrothelStatisticsMutation({
+      toUpdate: {
+        totalBrothelTaskFailed: true,
+      },
+    });
     setShowFailTaskDialog(false);
-    setBrothelCooldownMutation();
     router.push("/main");
   };
   return (

@@ -35,6 +35,7 @@ export default function SuccessAttackDialog({
   showSuccessAttackDialog,
   setShowSuccessAttackDialog,
   playerStats,
+  setIsLastBossDead,
   setIsMonsterDead,
   updatePlayerFightStatusMutation,
 }: {
@@ -54,6 +55,7 @@ export default function SuccessAttackDialog({
   setIsMonsterDead: (value: boolean) => void;
   setIsPlayerDead: (value: boolean) => void;
   hasSpecialPotionEffect: boolean;
+  setIsLastBossDead: (value: boolean) => void;
 }) {
   return (
     <AlertDialog open={showSuccessAttackDialog}>
@@ -144,8 +146,17 @@ export default function SuccessAttackDialog({
                 if (status === "player_dead") {
                   setIsPlayerDead(true);
                 }
-                if (status === "monster_dead") {
+                if (
+                  status === "monster_dead" &&
+                  monster.monster_type !== "Evil Deity"
+                ) {
                   setIsMonsterDead(true);
+                }
+                if (
+                  status === "monster_dead" &&
+                  monster.monster_type === "Evil Deity"
+                ) {
+                  setIsLastBossDead(true);
                 }
               }, 3000);
             }}

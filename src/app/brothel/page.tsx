@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -12,6 +12,9 @@ export default function BrothelPage() {
   const [isLoading, setIsLoading] = useState(false);
   const customers = useQuery(api.customers.getAllCustomers);
   const allBrothelTasks = useQuery(api.customer_tasks.getCustomerTasks);
+  const updateBrothelStatisticsMutation = useMutation(
+    api.player_statistics.updateBrothelStatistics
+  );
 
   useEffect(() => {
     if (!customers) {
@@ -100,7 +103,17 @@ export default function BrothelPage() {
           </div>
         </div>
         <div className="flex justify-center items-center">
-          <Button className="w-24 h-12" asChild>
+          <Button
+            onClick={() => {
+              updateBrothelStatisticsMutation({
+                toUpdate: {
+                  totalBrothlelTask: true,
+                },
+              });
+            }}
+            className="w-24 h-12"
+            asChild
+          >
             <Link href={"/brothel/serve"}>Serve</Link>
           </Button>
         </div>

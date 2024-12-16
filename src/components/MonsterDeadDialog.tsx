@@ -76,7 +76,11 @@ export default function MonsterDeadDialog({
                         XP
                       </TableCell>
                       <TableCell className="text-2xl text-orange-500">
-                        {newPlayerExp} XP
+                        {newPlayerExp < 543 || player.level !== 8 ? (
+                          <span>{newPlayerExp} XP</span>
+                        ) : (
+                          <span>You have reached max level</span>
+                        )}
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -151,9 +155,14 @@ export default function MonsterDeadDialog({
                         </TableCell>
                         <TableCell className="text-2xl">
                           <span className=" text-orange-500">
-                            {newPlayerExp}{" "}
+                            {newPlayerExp < 543 || player.level !== 8 ? (
+                              <span>{newPlayerExp} XP</span>
+                            ) : (
+                              <span className="text-lg">
+                                You have reached max level
+                              </span>
+                            )}
                           </span>
-                          XP
                         </TableCell>
                       </TableRow>
                       <TableRow>

@@ -9,7 +9,9 @@ import { useState } from "react";
 import { api } from "../../../../convex/_generated/api";
 
 export default function ServePage() {
-  const updateGold = useMutation(api.customer_tasks.completedBrothelTask);
+  const updateGoldMutation = useMutation(
+    api.customer_tasks.completedBrothelTask
+  );
   const customer = useQuery(api.customers.getRandomCustomer);
   const task = useQuery(api.customer_tasks.getRandomTask);
   const [showEarnedGold, setShowEarnedGold] = useState(false);
@@ -17,6 +19,9 @@ export default function ServePage() {
   const [showFailTaskDialog, setShowFailTaskDialog] = useState(false);
   const setBrothelCooldownMutation = useMutation(
     api.customers.setBrothelCooldown
+  );
+  const updateBrothelStatisticsMutation = useMutation(
+    api.player_statistics.updateBrothelStatistics
   );
 
   if (!player) {
@@ -45,12 +50,15 @@ export default function ServePage() {
       ) : (
         <div className={showEarnedGold ? "blur" : "flex flex-col gap-8"}>
           <BrothelSuccessTaskDialog
+            updateBrothelStatisticsMutation={updateBrothelStatisticsMutation}
+            updateGoldMutation={updateGoldMutation}
             earnedGold={earnedGold}
             player={player}
             setShowEarnedGold={setShowEarnedGold}
             showEarnedGold={showEarnedGold}
           />
           <BrothelFailTaskDialog
+            updateBrothelStatisticsMutation={updateBrothelStatisticsMutation}
             setBrothelCooldownMutation={setBrothelCooldownMutation}
             showFailTaskDialog={showFailTaskDialog}
             setShowFailTaskDialog={setShowFailTaskDialog}
@@ -93,7 +101,6 @@ export default function ServePage() {
               size={"lg"}
               variant={"default"}
               onClick={() => {
-                updateGold({ money: earnedGold });
                 setShowEarnedGold(true);
               }}
             >

@@ -17,6 +17,7 @@ import type * as customers from "../customers.js";
 import type * as customer_tasks from "../customer_tasks.js";
 import type * as monsters from "../monsters.js";
 import type * as players from "../players.js";
+import type * as player_statistics from "../player_statistics.js";
 import type * as player_stats from "../player_stats.js";
 import type * as shop from "../shop.js";
 
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   customer_tasks: typeof customer_tasks;
   monsters: typeof monsters;
   players: typeof players;
+  player_statistics: typeof player_statistics;
   player_stats: typeof player_stats;
   shop: typeof shop;
 }>;

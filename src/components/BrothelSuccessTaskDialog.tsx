@@ -10,21 +10,37 @@ import {
 import { Doc } from "../../convex/_generated/dataModel";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 export function BrothelSuccessTaskDialog({
   setShowEarnedGold,
   showEarnedGold,
   earnedGold,
+  updateGoldMutation,
   player,
+  updateBrothelStatisticsMutation,
 }: {
   showEarnedGold: boolean;
   earnedGold: number;
   player: Doc<"players">;
   setShowEarnedGold: (value: boolean) => void;
+  updateGoldMutation: ReturnType<
+    typeof useMutation<typeof api.customer_tasks.completedBrothelTask>
+  >;
+  updateBrothelStatisticsMutation: ReturnType<
+    typeof useMutation<typeof api.player_statistics.updateBrothelStatistics>
+  >;
 }) {
   const router = useRouter();
 
-  const handleCloseDialog = () => {
+  const handleCloseDialog = async () => {
+    await updateGoldMutation({ money: earnedGold });
+    await updateBrothelStatisticsMutation({
+      toUpdate: {
+        totalBrothelTaskCompleted: true,
+      },
+    });
     setShowEarnedGold(false);
     router.replace("/brothel");
   };
@@ -42,7 +58,7 @@ export function BrothelSuccessTaskDialog({
           </AlertDialogDescription>
           <AlertDialogDescription className="text-2xl">
             Your total gold is now:{" "}
-            <span className="text-yellow-400">{player.gold}</span>.
+            <span className="text-yellow-400">{player.gold + earnedGold}</span>.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

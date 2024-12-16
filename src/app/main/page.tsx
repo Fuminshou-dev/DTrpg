@@ -53,9 +53,6 @@ function BrothelButton({
 
     return () => clearInterval(timer);
   }, [cooldown]);
-  if (!cooldown) {
-    return <>Loading...</>;
-  }
 
   if (countdown > 0) {
     return (

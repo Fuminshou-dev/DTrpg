@@ -79,6 +79,48 @@ export default defineSchema(
         })
       ),
     }).index("by_userId", ["userId"]),
+    player_statistics: defineTable({
+      playerId: v.id("players"),
+      gold: v.object({
+        totalEarned: v.number(),
+        totalSpent: v.number(),
+      }),
+      monsters: v.object({
+        totalMonstersDefeated: v.number(),
+        monsterSpecificStats: v.object({
+          goblin: v.number(),
+          werewolf: v.number(),
+          minotaur: v.number(),
+          vampire: v.number(),
+          fox: v.number(),
+          priest: v.number(),
+          diety: v.number(),
+        }),
+      }),
+      combat: v.object({
+        totalCombatTasks: v.number(),
+        totalDamageDealt: v.number(),
+        totalDamageTaken: v.number(),
+        totalCombatTasksCompleted: v.number(),
+        totalCombatTasksFailed: v.number(),
+      }),
+      brothel: v.object({
+        totalBrothelTasks: v.number(),
+        totalBrothelTasksCompleted: v.number(),
+        totalBrothelTasksFailed: v.number(),
+      }),
+      potions: v.object({
+        totalPotionsBought: v.number(),
+        totalHealingPotionsBought: v.number(),
+        totalHealingHiPotionsBought: v.number(),
+        totalRerollPotionsBought: v.number(),
+        totalSpecialPotionsBought: v.number(),
+        totalHealingpotionsUsed: v.number(),
+        totalHealingHiPotionsUsed: v.number(),
+        totalRerollPotionsUsed: v.number(),
+        totalSpecialPotionsUsed: v.number(),
+      }),
+    }).index("by_playerId", ["playerId"]),
     shop_items: defineTable({
       amount: v.number(),
       effectDescription: v.string(),
