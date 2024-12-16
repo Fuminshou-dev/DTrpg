@@ -195,6 +195,10 @@ export default function EvilDeityVictoryScreen({
                 {playerStatistics.potions.totalHealingPotionsBought}
               </p>
               <p>
+                Healing Potions Used:{" "}
+                {playerStatistics.potions.totalHealingPotionsUsed}
+              </p>
+              <p>
                 Healing Hi-Potions Bought:{" "}
                 {playerStatistics.potions.totalHealingHiPotionsBought}
               </p>
@@ -208,7 +212,7 @@ export default function EvilDeityVictoryScreen({
               </p>
               <p>
                 Healing Potions Used:{" "}
-                {playerStatistics.potions.totalHealingpotionsUsed}
+                {playerStatistics.potions.totalHealingPotionsUsed}
               </p>
               <p>
                 Healing Hi-Potions Used:{" "}

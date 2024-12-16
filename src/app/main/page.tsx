@@ -106,6 +106,10 @@ export default function Game() {
     api.players.updatePlayerSpecialPotionEffect
   );
 
+  const updatePlayerPotionStatisticsMutation = useMutation(
+    api.player_statistics.updatePlayerPotionStatistics
+  );
+
   useEffect(() => {
     if (!player || !nextLevelStats) return;
     const required_exp = nextLevelStats.required_exp;
@@ -127,10 +131,16 @@ export default function Game() {
     updatePlayerItemsAfterUseMutation,
     setShowError,
     setErrorMsg,
+    updatePlayerPotionStatisticsMutation,
   }: {
     itemType: itemTypes;
     updatePlayerItemsAfterUseMutation: ReturnType<
       typeof useMutation<typeof api.players.updatePlayerItemsAfterUse>
+    >;
+    updatePlayerPotionStatisticsMutation: ReturnType<
+      typeof useMutation<
+        typeof api.player_statistics.updatePlayerPotionStatistics
+      >
     >;
     setShowError: (value: boolean) => void;
     setErrorMsg: (value: string) => void;
@@ -150,6 +160,12 @@ export default function Game() {
       setErrorMsg(result.message);
       return;
     }
+
+    await updatePlayerPotionStatisticsMutation({
+      toUpdate: {
+        specialPotionUsed: true,
+      },
+    });
 
     await updatePlayerSpecialPotionEffectMutation({
       shouldPlayerHaveSpecialEffect: true,
@@ -263,6 +279,7 @@ export default function Game() {
                                 <Button
                                   onClick={() =>
                                     handleUseSpecialPotion({
+                                      updatePlayerPotionStatisticsMutation,
                                       itemType: "special",
                                       setErrorMsg,
                                       setShowError,

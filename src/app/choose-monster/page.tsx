@@ -42,6 +42,10 @@ export default function FightPage() {
     level: player?.level ?? 1,
   });
 
+  const updatePlayerCombatStatisticsMutation = useMutation(
+    api.player_statistics.updatePlayerCombatStatistics
+  );
+
   const atkMultiplier = getRandomAtkMultiplier();
 
   if (
@@ -153,7 +157,7 @@ export default function FightPage() {
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => {
+                        onClick={async () => {
                           const finalDmg = calculateFinalDmg({
                             atkMultiplier: atkMultiplier,
                             playerAtk: playerStats?.atk ?? 0,
@@ -162,7 +166,7 @@ export default function FightPage() {
                           });
                           const monsterAtk = calculateMonsterDmg({ monster });
 
-                          updatePlayerFightStatus({
+                          await updatePlayerFightStatus({
                             fightStatus: {
                               status: "fighting",
                               atkMultiplier: atkMultiplier,
@@ -173,6 +177,11 @@ export default function FightPage() {
                               monsterId: monster.showId,
                               playerAtk: playerStats?.atk ?? 0,
                               playerHp: playerStats?.hp ?? 0,
+                            },
+                          });
+                          await updatePlayerCombatStatisticsMutation({
+                            toUpdate: {
+                              totalCombatTasks: true,
                             },
                           });
                           router.push(`/fight/`);

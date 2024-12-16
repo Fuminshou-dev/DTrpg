@@ -167,3 +167,116 @@ export const updateGoldStatistics = mutation({
     });
   },
 });
+
+export const updatePlayerPotionStatistics = mutation({
+  args: {
+    toUpdate: v.object({
+      healingPotionUsed: v.optional(v.boolean()),
+      healingHiPotionUsed: v.optional(v.boolean()),
+      rerollPotionUsed: v.optional(v.boolean()),
+      specialPotionUsed: v.optional(v.boolean()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthorized");
+    }
+    const userId = identity.subject;
+    const player = await ctx.db
+      .query("players")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!player) {
+      throw new Error("Player not found");
+    }
+
+    const playerSpecificStats = await ctx.db
+      .query("player_statistics")
+      .withIndex("by_playerId", (q) => q.eq("playerId", player._id))
+      .first();
+
+    if (!playerSpecificStats) {
+      throw new Error("Player statistics not found");
+    }
+
+    if (args.toUpdate.healingPotionUsed) {
+      playerSpecificStats.potions.totalHealingPotionsUsed++;
+      await ctx.db.patch(playerSpecificStats._id, playerSpecificStats);
+    }
+    if (args.toUpdate.healingHiPotionUsed) {
+      playerSpecificStats.potions.totalHealingHiPotionsUsed++;
+      await ctx.db.patch(playerSpecificStats._id, playerSpecificStats);
+    }
+    if (args.toUpdate.rerollPotionUsed) {
+      playerSpecificStats.potions.totalRerollPotionsUsed++;
+      await ctx.db.patch(playerSpecificStats._id, playerSpecificStats);
+    }
+    if (args.toUpdate.specialPotionUsed) {
+      playerSpecificStats.potions.totalSpecialPotionsUsed++;
+      await ctx.db.patch(playerSpecificStats._id, playerSpecificStats);
+    }
+
+    playerSpecificStats.potions.totalPotionsUsed++;
+    await ctx.db.patch(playerSpecificStats._id, playerSpecificStats);
+  },
+});
+
+export const updatePlayerCombatStatistics = mutation({
+  args: {
+    toUpdate: v.object({
+      totalCombatTasks: v.optional(v.boolean()),
+      totalCombatTasksCompleted: v.optional(v.boolean()),
+      totalCombatTasksFailed: v.optional(v.boolean()),
+      totalDamageDealt: v.optional(v.number()),
+      totalDamageTaken: v.optional(v.number()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthorized");
+    }
+    const userId = identity.subject;
+    const player = await ctx.db
+      .query("players")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!player) {
+      throw new Error("Player not found");
+    }
+    const playerSpecificStats = await ctx.db
+      .query("player_statistics")
+      .withIndex("by_playerId", (q) => q.eq("playerId", player._id))
+      .first();
+
+    if (!playerSpecificStats) {
+      throw new Error("Player statistics not found");
+    }
+
+    if (args.toUpdate.totalCombatTasks) {
+      playerSpecificStats.combat.totalCombatTasks++;
+      await ctx.db.patch(playerSpecificStats._id, playerSpecificStats);
+    }
+    if (args.toUpdate.totalCombatTasksCompleted) {
+      playerSpecificStats.combat.totalCombatTasksCompleted++;
+      await ctx.db.patch(playerSpecificStats._id, playerSpecificStats);
+    }
+    if (args.toUpdate.totalCombatTasksFailed) {
+      playerSpecificStats.combat.totalCombatTasksFailed++;
+      await ctx.db.patch(playerSpecificStats._id, playerSpecificStats);
+    }
+    if (args.toUpdate.totalDamageDealt) {
+      playerSpecificStats.combat.totalDamageDealt +=
+        args.toUpdate.totalDamageDealt;
+      await ctx.db.patch(playerSpecificStats._id, playerSpecificStats);
+    }
+    if (args.toUpdate.totalDamageTaken) {
+      playerSpecificStats.combat.totalDamageTaken +=
+        args.toUpdate.totalDamageTaken;
+      await ctx.db.patch(playerSpecificStats._id, playerSpecificStats);
+    }
+  },
+});

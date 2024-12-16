@@ -43,6 +43,9 @@ export default function MonsterFightPage() {
   const updatePlayerItemsAfterUseMutation = useMutation(
     api.players.updatePlayerItemsAfterUse
   );
+  const updatePlayerPotionStatisticsMutation = useMutation(
+    api.player_statistics.updatePlayerPotionStatistics
+  );
   const [showFailAttackDialog, setShowFailAttackDialog] = useState(false);
   const [showSuccessAttackDialog, setShowSuccessAttackDialog] = useState(false);
   const [isPlayerDead, setIsPlayedDead] = useState(false);
@@ -129,6 +132,12 @@ export default function MonsterFightPage() {
       return;
     }
 
+    await updatePlayerPotionStatisticsMutation({
+      toUpdate: {
+        rerollPotionUsed: true,
+      },
+    });
+
     await updatePlayerFightStatus({
       hasSpecialPotionEffect,
       monster: currentMonster,
@@ -171,6 +180,22 @@ export default function MonsterFightPage() {
       await updatePlayerItemsAfterUseMutation({
         itemType: itemType,
       });
+
+      if (itemType === "restore1") {
+        await updatePlayerPotionStatisticsMutation({
+          toUpdate: {
+            healingPotionUsed: true,
+          },
+        });
+      }
+
+      if (itemType === "restore2") {
+        await updatePlayerPotionStatisticsMutation({
+          toUpdate: {
+            healingHiPotionUsed: true,
+          },
+        });
+      }
 
       await updatePlayerFightStatusMutation({
         fightStatus: {
@@ -299,6 +324,7 @@ export default function MonsterFightPage() {
                   </p>
                 )}
                 <Button
+                  className="z-50"
                   onClick={() => {
                     if (item.type === "restore1" || item.type === "restore2") {
                       if (playerHp && levelStats) {
