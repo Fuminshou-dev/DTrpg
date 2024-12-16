@@ -29,6 +29,7 @@ export default function SuccessAttackDialog({
   monster,
   monsterId,
   playerAtk,
+  hasSpecialPotionEffect,
   setIsPlayerDead,
   finalDmg,
   showSuccessAttackDialog,
@@ -52,6 +53,7 @@ export default function SuccessAttackDialog({
   >;
   setIsMonsterDead: (value: boolean) => void;
   setIsPlayerDead: (value: boolean) => void;
+  hasSpecialPotionEffect: boolean;
 }) {
   return (
     <AlertDialog open={showSuccessAttackDialog}>
@@ -128,6 +130,7 @@ export default function SuccessAttackDialog({
               setTimeout(async () => {
                 setShowSuccessAttackDialog(false);
                 const { status } = await updatePlayerFightStatus({
+                  hasSpecialPotionEffect,
                   updatePlayerFightStatusMutation,
                   playerHp,
                   monsterHp,

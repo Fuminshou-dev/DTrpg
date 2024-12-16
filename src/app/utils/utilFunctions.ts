@@ -13,8 +13,20 @@ export const getRandomAtkMultiplier = () => {
   return ATK_MULTIPLIER[Math.floor(Math.random() * ATK_MULTIPLIER.length)];
 };
 
-export const calculateFinalDmg = (playerAtk: number, atkMultiplier: number) => {
-  const finalDmg = Math.floor(playerAtk * atkMultiplier);
+export const calculateFinalDmg = ({
+  playerAtk,
+  atkMultiplier,
+  hasSpecialPotionEffect,
+}: {
+  playerAtk: number;
+  atkMultiplier: number;
+  hasSpecialPotionEffect: boolean;
+}) => {
+  const finalDmg = Math.floor(
+    hasSpecialPotionEffect
+      ? playerAtk * atkMultiplier * 2
+      : playerAtk * atkMultiplier
+  );
   return finalDmg;
 };
 
@@ -40,6 +52,7 @@ export async function updatePlayerFightStatus({
   playerHp,
   monsterAtk,
   finalDmg,
+  hasSpecialPotionEffect,
 }: {
   updatePlayerFightStatusMutation: ReturnType<
     typeof useMutation<typeof api.players.updatePlayerFightStatus>
@@ -52,10 +65,15 @@ export async function updatePlayerFightStatus({
   playerHp: number;
   finalDmg: number;
   monsterAtk: number;
+  hasSpecialPotionEffect: boolean;
 }) {
   const newAtkMultipler = getRandomAtkMultiplier();
   const newRandomTask = getRandomTask({ monster });
-  const newFinalDmg = calculateFinalDmg(playerStats.atk, newAtkMultipler);
+  const newFinalDmg = calculateFinalDmg({
+    playerAtk: playerStats.atk,
+    atkMultiplier: newAtkMultipler,
+    hasSpecialPotionEffect,
+  });
   const newMonsterAtk = calculateMonsterDmg({ monster });
 
   // check if the player is dead

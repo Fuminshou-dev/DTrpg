@@ -154,16 +154,21 @@ export default function FightPage() {
                       </AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() => {
+                          const finalDmg = calculateFinalDmg({
+                            atkMultiplier: atkMultiplier,
+                            playerAtk: playerStats?.atk ?? 0,
+                            hasSpecialPotionEffect:
+                              player.hasSpecialPotionEffect,
+                          });
+                          const monsterAtk = calculateMonsterDmg({ monster });
+
                           updatePlayerFightStatus({
                             fightStatus: {
                               status: "fighting",
                               atkMultiplier: atkMultiplier,
                               currentTask: getRandomTask({ monster }),
-                              finalDmg: calculateFinalDmg(
-                                atkMultiplier,
-                                playerStats?.atk ?? 0
-                              ),
-                              monsterAtk: calculateMonsterDmg({ monster }),
+                              finalDmg: finalDmg,
+                              monsterAtk,
                               monsterHp: monster.hp,
                               monsterId: monster.showId,
                               playerAtk: playerStats?.atk ?? 0,

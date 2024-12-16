@@ -20,6 +20,7 @@ export const createPlayer = mutation({
     }
 
     const player = await ctx.db.insert("players", {
+      hasSpecialPotionEffect: false,
       userId: userId,
       playerName: args.playerName,
       gold: 0,
@@ -157,6 +158,7 @@ export const updatePlayerAfterDefeatingAMonster = mutation({
       gold: newPlayerGold,
       current_exp: newPlayerExp,
       fightStatus: "idle",
+      hasSpecialPotionEffect: false,
     });
 
     const newPlayer = await ctx.db
@@ -178,6 +180,8 @@ export const resetPlayer = mutation({
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.playerId, {
+      brothelCooldownUntil: 0,
+      hasSpecialPotionEffect: false,
       gold: 0,
       current_exp: 0,
       currentMonster: 0,
@@ -326,5 +330,32 @@ export const updatePlayerItemsAfterUse = mutation({
       items: updatedItems,
     });
     return { success: true, message: "Item used successfully" };
+  },
+});
+
+export const updatePlayerSpecialPotionEffect = mutation({
+  args: {
+    shouldPlayerHaveSpecialEffect: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    const userId = identity.subject;
+
+    const player = await ctx.db
+      .query("players")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!player) {
+      throw new Error("Player not found");
+    }
+
+    await ctx.db.patch(player._id, {
+      ...player,
+      hasSpecialPotionEffect: args.shouldPlayerHaveSpecialEffect,
+    });
   },
 });

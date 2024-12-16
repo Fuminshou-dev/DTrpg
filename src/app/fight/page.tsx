@@ -16,7 +16,6 @@ import {
   updatePlayerFightStatus,
 } from "../utils/utilFunctions";
 
-// TODO: add item usage logic
 // TODO: implement victory screen if monsterId = 6 ( EVIL DEITY )
 
 export default function MonsterFightPage() {
@@ -91,6 +90,7 @@ export default function MonsterFightPage() {
     monsterId,
     monsterHp,
     playerHp,
+    hasSpecialPotionEffect,
     itemType,
     updatePlayerFightStatusMutation,
   }: {
@@ -102,6 +102,7 @@ export default function MonsterFightPage() {
     updatePlayerFightStatusMutation: ReturnType<
       typeof useMutation<typeof api.players.updatePlayerFightStatus>
     >;
+    hasSpecialPotionEffect: boolean;
   }) => {
     const result = await updatePlayerItemsAfterUseMutation({
       itemType: itemType,
@@ -114,6 +115,7 @@ export default function MonsterFightPage() {
     }
 
     await updatePlayerFightStatus({
+      hasSpecialPotionEffect,
       monster: currentMonster,
       playerStats: levelStats,
       finalDmg: 0,
@@ -181,6 +183,7 @@ export default function MonsterFightPage() {
         setIsPlayerDead={setIsPlayedDead}
       />
       <SuccessAttackDialog
+        hasSpecialPotionEffect={player.hasSpecialPotionEffect}
         setIsMonsterDead={setIsMonsterDead}
         setIsPlayerDead={setIsPlayedDead}
         finalDmg={finalDmg ?? 0}
@@ -244,6 +247,7 @@ export default function MonsterFightPage() {
                     }
                   } else {
                     handleUseRerollPotion({
+                      hasSpecialPotionEffect: player.hasSpecialPotionEffect,
                       monsterHp: monsterHp ?? 0,
                       monsterId: monsterId ?? 0,
                       itemType: item.type,
@@ -288,7 +292,7 @@ export default function MonsterFightPage() {
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col justify-center items-center border rounded-lg p-4 shadow-md">
+          <div className="flex-1 flex flex-col justify-center items-center border rounded-lg p-4 shadow-md relative">
             <p className="text-2xl md:text-3xl font-bold mb-2">
               {player.playerName}
             </p>
@@ -302,6 +306,14 @@ export default function MonsterFightPage() {
                 }
                 indicatorcolor="bg-green-500"
               />
+              {player.hasSpecialPotionEffect && (
+                <p
+                  className="bg-gradient-to-r bg-clip-text  text-transparent 
+            from-blue-500 via-purple-500 to-indigo-500 absolute top-1/3 italic"
+                >
+                  Special Potion Effect
+                </p>
+              )}
             </div>
             <div className="mt-4 text-center">
               <p>
@@ -318,15 +330,25 @@ export default function MonsterFightPage() {
                 </span>
               </p>
               <p>
-                Final damage dealt to monster:
-                <span
-                  className={
-                    finalDmg && finalDmg > 0 ? "text-green-500" : "text-red-500"
-                  }
-                >
-                  {" "}
-                  {finalDmg}
-                </span>
+                <p>
+                  Final damage dealt to monster:{" "}
+                  {finalDmg !== undefined && (
+                    <>
+                      {finalDmg <= 0 ? (
+                        <span className="text-red-500">{finalDmg}</span>
+                      ) : player.hasSpecialPotionEffect ? (
+                        <span className="bg-gradient-to-r bg-clip-text text-transparent from-blue-500 via-purple-500 to-indigo-500">
+                          {finalDmg}
+                        </span>
+                      ) : (
+                        <span className="text-green-500">{finalDmg}</span>
+                      )}
+                    </>
+                  )}
+                  {finalDmg === undefined && (
+                    <span className="text-gray-500">Not available</span>
+                  )}
+                </p>
               </p>
             </div>
           </div>
@@ -339,7 +361,13 @@ export default function MonsterFightPage() {
           <div className="text-lg sm:text-xl">
             <p>
               Gained EXP:{" "}
-              <span className="text-orange-500">{currentMonster.exp}</span>
+              {player.hasSpecialPotionEffect ? (
+                <span className="bg-gradient-to-r bg-clip-text text-transparent from-blue-500 via-purple-500 to-indigo-500">
+                  {currentMonster.exp * 2}
+                </span>
+              ) : (
+                <span className="text-orange-500">{currentMonster.exp}</span>
+              )}
             </p>
             <p>
               Gained GOLD:{" "}

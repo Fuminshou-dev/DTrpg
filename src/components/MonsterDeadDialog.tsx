@@ -41,7 +41,9 @@ export default function MonsterDeadDialog({
   levelStats: Doc<"player_stats">;
 }) {
   const router = useRouter();
-  const newPlayerExp = player.current_exp + monster.exp;
+  const newPlayerExp =
+    player.current_exp +
+    (player.hasSpecialPotionEffect ? monster.exp * 2 : monster.exp);
   return (
     <AlertDialog open={isMonsterDead}>
       <AlertDialogContent>
@@ -68,7 +70,10 @@ export default function MonsterDeadDialog({
                     <TableRow>
                       <TableCell className="text-2xl">Exp</TableCell>
                       <TableCell className="text-2xl text-orange-500">
-                        {monster.exp} XP
+                        {player.hasSpecialPotionEffect
+                          ? monster.exp * 2
+                          : monster.exp}{" "}
+                        XP
                       </TableCell>
                       <TableCell className="text-2xl text-orange-500">
                         {newPlayerExp} XP
@@ -138,7 +143,9 @@ export default function MonsterDeadDialog({
                         <TableCell className="text-2xl">Exp</TableCell>
                         <TableCell className="text-2xl">
                           <span className=" text-orange-500">
-                            {monster.exp}{" "}
+                            {player.hasSpecialPotionEffect
+                              ? monster.exp * 2
+                              : monster.exp}{" "}
                           </span>
                           XP
                         </TableCell>
@@ -213,6 +220,11 @@ export default function MonsterDeadDialog({
                   fight page.
                 </span>
               )}
+              {player.hasSpecialPotionEffect && (
+                <span className="text-red-500 text-2xl text-center border border-red-400 my-2">
+                  You Special Potion has wore off.
+                </span>
+              )}
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -225,7 +237,9 @@ export default function MonsterDeadDialog({
 
               setTimeout(async () => {
                 updatePlayerAfterDefeatingAMonster({
-                  earnedExp: monster.exp,
+                  earnedExp: player.hasSpecialPotionEffect
+                    ? monster.exp * 2
+                    : monster.exp,
                   earnedGold: monster.gold,
                   monsterId: monster.showId,
                 });

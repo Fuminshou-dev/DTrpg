@@ -4,39 +4,27 @@ import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
-import { SignOutButton } from "@clerk/nextjs";
-import { Authenticated, useQuery } from "convex/react";
-import { AnimatePresence, motion } from "framer-motion";
-import Image, { StaticImageData } from "next/image";
-import { useEffect, useState } from "react";
-import reroll from "@/public/reroll.jpg";
-import restore1 from "@/public/restore1.jpg";
-import restore2 from "@/public/restore2.jpg";
-import special from "@/public/special.jpg";
-import { api } from "../../../convex/_generated/api";
-import Link from "next/link";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { itemOrder } from "../utils/constants";
+import { cn } from "@/lib/utils";
 
-const itemImages: { [key: string]: StaticImageData } = {
-  restore1: restore1,
-  restore2: restore2,
-  special: special,
-  reroll: reroll,
-};
-const ItemDescriptions: { [key: string]: string } = {
-  restore1: "Restores half of your hp",
-  restore2: "restores full hp",
-  special:
-    "Doubles the experience gained in the next battle and doubles the damage dealt to enemies of a lower level than you",
-  reroll: "Allows you to rerrol current roll",
-};
+import { useMutation, useQuery } from "convex/react";
+import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { api } from "../../../convex/_generated/api";
+import {
+  ItemDescriptions,
+  itemImages,
+  itemOrder,
+  itemTypes,
+} from "../utils/constants";
+import ErrorDialog from "@/components/ErrorDialog";
 
 function BrothelButton({
   getPlayerBrothelCooldownQuery,
@@ -95,6 +83,8 @@ function BrothelButton({
 export default function Game() {
   const [progressValue, setProgressValue] = useState(0);
   const [showItems, setShowItems] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const player = useQuery(api.players.getPlayer);
   const levelStats = useQuery(
     api.player_stats.getLevelStats,
@@ -110,6 +100,13 @@ export default function Game() {
     {
       userId: player?.userId ?? "skip",
     }
+  );
+  const updatePlayerItemsAfterUseMutation = useMutation(
+    api.players.updatePlayerItemsAfterUse
+  );
+
+  const updatePlayerSpecialPotionEffectMutation = useMutation(
+    api.players.updatePlayerSpecialPotionEffect
   );
 
   useEffect(() => {
@@ -128,8 +125,48 @@ export default function Game() {
     );
   }
 
+  const handleUseSpecialPotion = async ({
+    itemType,
+    updatePlayerItemsAfterUseMutation,
+    setShowError,
+    setErrorMsg,
+  }: {
+    itemType: itemTypes;
+    updatePlayerItemsAfterUseMutation: ReturnType<
+      typeof useMutation<typeof api.players.updatePlayerItemsAfterUse>
+    >;
+    setShowError: (value: boolean) => void;
+    setErrorMsg: (value: string) => void;
+  }) => {
+    if (player.hasSpecialPotionEffect) {
+      setShowError(true);
+      setErrorMsg("You already have a special potion effect!");
+      return;
+    }
+
+    const result = await updatePlayerItemsAfterUseMutation({
+      itemType: itemType,
+    });
+
+    if (!result.success) {
+      setShowError(true);
+      setErrorMsg(result.message);
+      return;
+    }
+
+    await updatePlayerSpecialPotionEffectMutation({
+      shouldPlayerHaveSpecialEffect: true,
+    });
+  };
+
   return (
     <div className="container mx-auto h-screen flex flex-row justify-center items-center">
+      <ErrorDialog
+        errorMsg={errorMsg}
+        setErrorMsg={setErrorMsg}
+        setShowError={setShowError}
+        showError={showError}
+      />
       <div className={cn("flex flex-row", showItems ? "gap-0" : "gap-4")}>
         <motion.div
           initial={{ x: 0 }}
@@ -137,11 +174,6 @@ export default function Game() {
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className="flex flex-col gap-4 justify-center items-center border rounded-lg p-8"
         >
-          <Authenticated>
-            <Button variant={"outline"} className="border p-4" asChild>
-              <SignOutButton redirectUrl="/login"></SignOutButton>
-            </Button>
-          </Authenticated>
           <h2 className="text-3xl">{player.playerName}</h2>
           <Skeleton className="w-16 h-16 rounded-lg"></Skeleton>
           <p className="text-2xl">
@@ -231,8 +263,19 @@ export default function Game() {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span tabIndex={0}>
-                                {/* TODO: Implement reroll and double dmg functionality */}
-                                <Button disabled={item.amount <= 0}>Use</Button>
+                                <Button
+                                  onClick={() =>
+                                    handleUseSpecialPotion({
+                                      itemType: "special",
+                                      setErrorMsg,
+                                      setShowError,
+                                      updatePlayerItemsAfterUseMutation,
+                                    })
+                                  }
+                                  disabled={item.amount <= 0}
+                                >
+                                  Use
+                                </Button>
                               </span>
                             </TooltipTrigger>
                             <TooltipContent>
