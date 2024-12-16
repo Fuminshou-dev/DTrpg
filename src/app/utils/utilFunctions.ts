@@ -1,7 +1,7 @@
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Doc } from "../../../convex/_generated/dataModel";
-import { ATK_MULTIPLIER } from "./constants";
+import { ATK_MULTIPLIER, itemTypes } from "./constants";
 
 export const getRandomTask = ({ monster }: { monster: Doc<"monsters"> }) => {
   const randomTask =
@@ -86,3 +86,33 @@ export async function updatePlayerFightStatus({
 
   return { status: "fight_continues" };
 }
+
+export const calculateHealAmount = ({
+  playerCurrentHp,
+  playerMaxHp,
+  itemType,
+}: {
+  playerCurrentHp: number;
+  playerMaxHp: number;
+  itemType: itemTypes;
+}) => {
+  let healAmount: number;
+  if (itemType === "restore1") {
+    const halfHealth = Math.floor(playerMaxHp / 2);
+    if (playerCurrentHp + halfHealth >= playerMaxHp) {
+      healAmount = playerMaxHp - playerCurrentHp;
+      return healAmount;
+    }
+    healAmount = halfHealth;
+    return healAmount;
+  }
+
+  if (itemType === "restore2") {
+    healAmount = playerMaxHp - playerCurrentHp;
+    return healAmount;
+  }
+
+  if (itemType === "special" || itemType === "reroll") {
+    return null;
+  }
+};

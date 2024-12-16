@@ -22,8 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-const itemOrder = ["restore1", "restore2", "reroll", "special"];
+import { itemOrder } from "../utils/constants";
 
 const itemImages: { [key: string]: StaticImageData } = {
   restore1: restore1,

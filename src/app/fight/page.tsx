@@ -9,6 +9,9 @@ import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import PlayerDeadDialog from "@/components/PlayerDeadDialog";
 import MonsterDeadDialog from "@/components/MonsterDeadDialog";
+import { itemOrder, itemTypes } from "../utils/constants";
+import { calculateHealAmount } from "../utils/utilFunctions";
+import ErrorDialog from "@/components/ErrorDialog";
 
 // TODO: add item usage logic
 // TODO: implement victory screen if monsterId = 6 ( EVIL DEITY )
@@ -22,10 +25,15 @@ export default function MonsterFightPage() {
     api.players.updatePlayerFightStatus
   );
   const resetPlayerMutation = useMutation(api.players.resetPlayer);
+  const updatePlayerItemsAfterUseMutation = useMutation(
+    api.players.updatePlayerItemsAfterUse
+  );
   const [showFailAttackDialog, setShowFailAttackDialog] = useState(false);
   const [showSuccessAttackDialog, setShowSuccessAttackDialog] = useState(false);
   const [isPlayerDead, setIsPlayedDead] = useState(false);
   const [isMonsterDead, setIsMonsterDead] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const playerLevel = player?.level ?? 0;
 
   const levelStats = useQuery(api.player_stats.getLevelStats, {
@@ -75,8 +83,54 @@ export default function MonsterFightPage() {
     );
   }
 
+  const handleUseHealingItem = async (
+    playerCurrentHp: number,
+    playerMaxHp: number,
+    itemType: itemTypes
+  ) => {
+    const healAmount = calculateHealAmount({
+      itemType,
+      playerCurrentHp,
+      playerMaxHp,
+    });
+
+    if (itemType === "reroll" || itemType === "special") {
+      return;
+    }
+
+    if (playerCurrentHp === playerMaxHp) {
+      setErrorMsg("You already have full health. Item wasn't used.");
+      setShowError(true);
+      return;
+    }
+
+    console.log(`Healed by ${healAmount}`);
+    if (healAmount && healAmount > 0 && playerFightStatus) {
+      // Only heal if amount is positive
+      const newPlayerHp = Math.min(playerCurrentHp + healAmount, playerMaxHp);
+
+      await updatePlayerFightStatusMutation({
+        fightStatus: {
+          ...playerFightStatus,
+          playerHp: newPlayerHp,
+        },
+      });
+    } else {
+      console.log("No healing performed");
+    }
+    await updatePlayerItemsAfterUseMutation({
+      itemType: itemType,
+    });
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen flex flex-col justify-center">
+      <ErrorDialog
+        errorMsg={errorMsg}
+        setErrorMsg={setErrorMsg}
+        setShowError={setShowError}
+        showError={showError}
+      />
       <PlayerDeadDialog
         isPlayerDead={isPlayerDead}
         playerId={player._id}
@@ -122,6 +176,37 @@ export default function MonsterFightPage() {
           updatePlayerAfterDefeatingAMonsterMutation
         }
       />
+      <div className="fixed top-1/3 right-16 grid grid-cols-2 gap-2">
+        {player.items
+          .sort((a, b) => itemOrder.indexOf(a.type) - itemOrder.indexOf(b.type))
+          .map((item) => (
+            <div
+              key={item.type}
+              className="border p-4  rounded aspect-square h-full w-full flex flex-col justify-evenly items-center gap-2 relative"
+            >
+              <div className="absolute top-2 flex justify-center items-center right-2 p-1 border rounded-full w-5 h-5">
+                <p className="text-center text-xs select-none">i</p>
+              </div>
+              <p>{item.itemName}</p>
+              {item.amount === 0 ? (
+                <p className="text-red-500">{item.amount}</p>
+              ) : (
+                <p className="text-green-500">{item.amount}</p>
+              )}
+              <Button
+                onClick={() => {
+                  if (playerHp && levelStats) {
+                    handleUseHealingItem(playerHp, levelStats.hp, item.type);
+                  }
+                }}
+                disabled={item.amount === 0 || item.type === "special"}
+                size={"sm"}
+              >
+                Use
+              </Button>
+            </div>
+          ))}
+      </div>
       <div className="flex flex-col gap-6 max-w-2xl mx-auto w-full">
         <div className="flex flex-col md:flex-row gap-6 max-w-4xl mx-auto w-full">
           <div className="flex-1 flex flex-col justify-center items-center border rounded-lg p-4 shadow-md">

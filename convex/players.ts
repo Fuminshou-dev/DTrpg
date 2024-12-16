@@ -288,3 +288,35 @@ export const getPlayerBrothelCooldown = query({
     return player?.brothelCooldownUntil || 0;
   },
 });
+
+export const updatePlayerItemsAfterUse = mutation({
+  args: {
+    itemType: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    const userId = identity.subject;
+
+    const player = await ctx.db
+      .query("players")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!player) {
+      throw new Error("Player not found");
+    }
+
+    const newItems = player.items.map((item) => {
+      if (item.type === args.itemType) {
+        item.amount -= 1;
+      }
+      return item;
+    });
+    await ctx.db.patch(player._id, {
+      items: newItems,
+    });
+  },
+});
