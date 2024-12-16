@@ -1,5 +1,8 @@
 "use client";
+import ErrorDialog from "@/components/ErrorDialog";
 import FailDialog from "@/components/FailAttackDialog";
+import MonsterDeadDialog from "@/components/MonsterDeadDialog";
+import PlayerDeadDialog from "@/components/PlayerDeadDialog";
 import SuccessAttackDialog from "@/components/SuccessAttackDialog";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -7,11 +10,11 @@ import { Progress } from "@/components/ui/progress";
 import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
-import PlayerDeadDialog from "@/components/PlayerDeadDialog";
-import MonsterDeadDialog from "@/components/MonsterDeadDialog";
 import { itemOrder, itemTypes } from "../utils/constants";
-import { calculateHealAmount } from "../utils/utilFunctions";
-import ErrorDialog from "@/components/ErrorDialog";
+import {
+  calculateHealAmount,
+  updatePlayerFightStatus,
+} from "../utils/utilFunctions";
 
 // TODO: add item usage logic
 // TODO: implement victory screen if monsterId = 6 ( EVIL DEITY )
@@ -83,6 +86,46 @@ export default function MonsterFightPage() {
     );
   }
 
+  const handleUseRerollPotion = async ({
+    playerAtk,
+    monsterId,
+    monsterHp,
+    playerHp,
+    itemType,
+    updatePlayerFightStatusMutation,
+  }: {
+    playerAtk: number;
+    monsterId: number;
+    monsterHp: number;
+    playerHp: number;
+    itemType: itemTypes;
+    updatePlayerFightStatusMutation: ReturnType<
+      typeof useMutation<typeof api.players.updatePlayerFightStatus>
+    >;
+  }) => {
+    const result = await updatePlayerItemsAfterUseMutation({
+      itemType: itemType,
+    });
+
+    if (!result.success) {
+      setShowError(true);
+      setErrorMsg(result.message);
+      return;
+    }
+
+    await updatePlayerFightStatus({
+      monster: currentMonster,
+      playerStats: levelStats,
+      finalDmg: 0,
+      monsterAtk: 0,
+      playerAtk: playerAtk,
+      monsterId: monsterId,
+      monsterHp: monsterHp,
+      playerHp: playerHp,
+      updatePlayerFightStatusMutation,
+    });
+  };
+
   const handleUseHealingItem = async (
     playerCurrentHp: number,
     playerMaxHp: number,
@@ -108,6 +151,9 @@ export default function MonsterFightPage() {
     if (healAmount && healAmount > 0 && playerFightStatus) {
       // Only heal if amount is positive
       const newPlayerHp = Math.min(playerCurrentHp + healAmount, playerMaxHp);
+      await updatePlayerItemsAfterUseMutation({
+        itemType: itemType,
+      });
 
       await updatePlayerFightStatusMutation({
         fightStatus: {
@@ -118,9 +164,6 @@ export default function MonsterFightPage() {
     } else {
       console.log("No healing performed");
     }
-    await updatePlayerItemsAfterUseMutation({
-      itemType: itemType,
-    });
   };
 
   return (
@@ -195,8 +238,19 @@ export default function MonsterFightPage() {
               )}
               <Button
                 onClick={() => {
-                  if (playerHp && levelStats) {
-                    handleUseHealingItem(playerHp, levelStats.hp, item.type);
+                  if (item.type === "restore1" || item.type === "restore2") {
+                    if (playerHp && levelStats) {
+                      handleUseHealingItem(playerHp, levelStats.hp, item.type);
+                    }
+                  } else {
+                    handleUseRerollPotion({
+                      monsterHp: monsterHp ?? 0,
+                      monsterId: monsterId ?? 0,
+                      itemType: item.type,
+                      playerAtk: playerAtk ?? 0,
+                      playerHp: playerHp ?? 0,
+                      updatePlayerFightStatusMutation,
+                    });
                   }
                 }}
                 disabled={item.amount === 0 || item.type === "special"}

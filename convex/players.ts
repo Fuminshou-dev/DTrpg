@@ -309,14 +309,22 @@ export const updatePlayerItemsAfterUse = mutation({
       throw new Error("Player not found");
     }
 
-    const newItems = player.items.map((item) => {
-      if (item.type === args.itemType) {
-        item.amount -= 1;
-      }
-      return item;
-    });
+    const itemIndex = player.items.findIndex(
+      (item) => item.type === args.itemType
+    );
+    if (itemIndex === -1 || player.items[itemIndex].amount === 0) {
+      return { success: false, message: "You do not have this item" };
+    }
+    const updatedItems = [...player.items];
+
+    updatedItems[itemIndex] = {
+      ...updatedItems[itemIndex],
+      amount: updatedItems[itemIndex].amount - 1,
+    };
+
     await ctx.db.patch(player._id, {
-      items: newItems,
+      items: updatedItems,
     });
+    return { success: true, message: "Item used successfully" };
   },
 });
