@@ -112,7 +112,13 @@ export default function Home() {
         <Button
           variant={"secondary"}
           size={"lg"}
-          onClick={() => setExplainRules(true)}
+          onClick={() => {
+            if (!isSignedIn) {
+              setExplainRules(true);
+            } else {
+              router.push("/main");
+            }
+          }}
           className="text-base sm:text-lg"
         >
           Start the game
@@ -179,7 +185,6 @@ export default function Home() {
             <AlertDialogAction
               onClick={() => {
                 setExplainRules(false);
-                router.push("/main");
               }}
             >
               Got it, let's go.

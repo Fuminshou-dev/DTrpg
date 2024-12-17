@@ -46,7 +46,7 @@ export default function MonsterDeadDialog({
     (player.hasSpecialPotionEffect ? monster.exp * 2 : monster.exp);
   return (
     <AlertDialog open={isMonsterDead}>
-      <AlertDialogContent className="p-4 sm:p-6 md:p-8 w-[95%] max-w-[500px] max-h-[90vh] mx-auto rounded-lg flex flex-col">
+      <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="text-xl sm:text-2xl md:text-3xl text-center">
             Congratulations! You have defeated the monster!
@@ -57,7 +57,7 @@ export default function MonsterDeadDialog({
           >
             <div>
               {newPlayerExp < nextLevelStats.required_exp && (
-                <Table className="mt-8 w-full text-xs sm:text-sm md:text-base lg:text-lg">
+                <Table className="mt-8 text-xs sm:text-sm md:text-base lg:text-lg">
                   <TableHeader>
                     <TableRow>
                       <TableHead className="">Stat</TableHead>

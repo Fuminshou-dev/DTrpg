@@ -28,6 +28,7 @@ import {
   calculateHealAmount,
   updatePlayerFightStatus,
 } from "../utils/utilFunctions";
+import PageControls from "@/components/Controls";
 
 export default function MonsterFightPage() {
   const player = useQuery(api.players.getPlayer);
@@ -39,7 +40,7 @@ export default function MonsterFightPage() {
   const [showError, setShowError] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [isLastBossDead, setIsLastBossDead] = useState(false);
-  const [showItems, setShowItems] = useState(true);
+  const [showItems, setShowItems] = useState(false);
   const playerLevel = player?.level ?? 0;
 
   const updatePlayerAfterDefeatingAMonsterMutation = useMutation(
@@ -232,92 +233,96 @@ export default function MonsterFightPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 flex flex-col justify-center min-h-screen">
+    <div className="container mx-auto">
       <EvilDeityVictoryScreen
         player={player}
         isLastBossDead={isLastBossDead}
         setIsLastBossDead={setIsLastBossDead}
       />
+      <ErrorDialog
+        errorMsg={errorMsg}
+        setErrorMsg={setErrorMsg}
+        setShowError={setShowError}
+        showError={showError}
+      />
+      <PlayerDeadDialog
+        isPlayerDead={isPlayerDead}
+        playerId={player._id}
+        resetPlayer={resetPlayerMutation}
+        setIsPlayerDead={setIsPlayedDead}
+      />
+      <SuccessAttackDialog
+        updatePlayerGoldMutation={updatePlayerGoldMutation}
+        updatePlayerMonstersStatisticsMutation={
+          updatePlayerMonstersStatisticsMutation
+        }
+        updatePlayerCombatStatisticsMutation={
+          updatePlayerCombatStatisticsMutation
+        }
+        setIsLastBossDead={setIsLastBossDead}
+        hasSpecialPotionEffect={player.hasSpecialPotionEffect}
+        setIsMonsterDead={setIsMonsterDead}
+        setIsPlayerDead={setIsPlayedDead}
+        finalDmg={finalDmg ?? 0}
+        monster={currentMonster}
+        monsterId={currentMonster.showId}
+        playerAtk={playerAtk ?? 0}
+        playerStats={levelStats}
+        updatePlayerFightStatusMutation={updatePlayerFightStatusMutation}
+        setShowSuccessAttackDialog={setShowSuccessAttackDialog}
+        showSuccessAttackDialog={showSuccessAttackDialog}
+        playerHp={playerHp ?? 0}
+        monsterHp={monsterHp ?? 0}
+        monsterAtk={monsterAtk ?? 0}
+      />
+      <FailDialog
+        updatePlayerCombatStatisticsMutation={
+          updatePlayerCombatStatisticsMutation
+        }
+        setIsPlayerDead={setIsPlayedDead}
+        hasSpecialPotionEffect={player.hasSpecialPotionEffect}
+        monster={currentMonster}
+        monsterId={currentMonster.showId}
+        playerAtk={playerAtk ?? 0}
+        playerStats={levelStats}
+        updatePlayerFightStatusMutation={updatePlayerFightStatusMutation}
+        setShowFailAttackDialog={setShowFailAttackDialog}
+        showFailAttackDialog={showFailAttackDialog}
+        playerHp={playerHp ?? 0}
+        monsterHp={monsterHp ?? 0}
+        monsterAtk={monsterAtk ?? 0}
+      />
+      <MonsterDeadDialog
+        nextLevelStats={nextLevelStats}
+        levelStats={levelStats}
+        player={player}
+        isMonsterDead={isMonsterDead}
+        monster={currentMonster}
+        setIsMonsterDead={setIsMonsterDead}
+        updatePlayerAfterDefeatingAMonster={
+          updatePlayerAfterDefeatingAMonsterMutation
+        }
+      />
+
       <div
         className={
           isLastBossDead
-            ? "container mx-auto px-4 py-8 min-h-screen flex flex-col justify-center blur"
-            : "container mx-auto px-4 py-8 min-h-screen flex flex-col justify-center"
+            ? "flex flex-col justify-center min-h-screen blur"
+            : "flex flex-col justify-between py-2 min-h-screen border"
         }
       >
-        <ErrorDialog
-          errorMsg={errorMsg}
-          setErrorMsg={setErrorMsg}
-          setShowError={setShowError}
-          showError={showError}
-        />
-        <PlayerDeadDialog
-          isPlayerDead={isPlayerDead}
-          playerId={player._id}
-          resetPlayer={resetPlayerMutation}
-          setIsPlayerDead={setIsPlayedDead}
-        />
-        <SuccessAttackDialog
-          updatePlayerGoldMutation={updatePlayerGoldMutation}
-          updatePlayerMonstersStatisticsMutation={
-            updatePlayerMonstersStatisticsMutation
-          }
-          updatePlayerCombatStatisticsMutation={
-            updatePlayerCombatStatisticsMutation
-          }
-          setIsLastBossDead={setIsLastBossDead}
-          hasSpecialPotionEffect={player.hasSpecialPotionEffect}
-          setIsMonsterDead={setIsMonsterDead}
-          setIsPlayerDead={setIsPlayedDead}
-          finalDmg={finalDmg ?? 0}
-          monster={currentMonster}
-          monsterId={currentMonster.showId}
-          playerAtk={playerAtk ?? 0}
-          playerStats={levelStats}
-          updatePlayerFightStatusMutation={updatePlayerFightStatusMutation}
-          setShowSuccessAttackDialog={setShowSuccessAttackDialog}
-          showSuccessAttackDialog={showSuccessAttackDialog}
-          playerHp={playerHp ?? 0}
-          monsterHp={monsterHp ?? 0}
-          monsterAtk={monsterAtk ?? 0}
-        />
-        <FailDialog
-          updatePlayerCombatStatisticsMutation={
-            updatePlayerCombatStatisticsMutation
-          }
-          setIsPlayerDead={setIsPlayedDead}
-          hasSpecialPotionEffect={player.hasSpecialPotionEffect}
-          monster={currentMonster}
-          monsterId={currentMonster.showId}
-          playerAtk={playerAtk ?? 0}
-          playerStats={levelStats}
-          updatePlayerFightStatusMutation={updatePlayerFightStatusMutation}
-          setShowFailAttackDialog={setShowFailAttackDialog}
-          showFailAttackDialog={showFailAttackDialog}
-          playerHp={playerHp ?? 0}
-          monsterHp={monsterHp ?? 0}
-          monsterAtk={monsterAtk ?? 0}
-        />
-        <MonsterDeadDialog
-          nextLevelStats={nextLevelStats}
-          levelStats={levelStats}
-          player={player}
-          isMonsterDead={isMonsterDead}
-          monster={currentMonster}
-          setIsMonsterDead={setIsMonsterDead}
-          updatePlayerAfterDefeatingAMonster={
-            updatePlayerAfterDefeatingAMonsterMutation
-          }
-        />
+        <div className="mb-2">
+          <PageControls doShowStatistics={false} />
+        </div>
         <Button
-          className="fixed top-2 right-4 sm:top-6 sm:right-12 lg:top-48 lg:left-12 lg:right-auto"
+          className="w-fit self-center"
           onClick={() => setShowItems(!showItems)}
         >
           {showItems ? "Hide Items" : "Show Items"}
         </Button>
 
         <div
-          className={`fixed top-16 right-12 md:right-16 z-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-2 gap-2 ${showItems ? "" : "hidden"}`}
+          className={`m-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-2 gap-2 ${showItems ? "" : "hidden"}`}
         >
           {player.items
             .sort(
@@ -393,7 +398,7 @@ export default function MonsterFightPage() {
             ))}
         </div>
 
-        <div className="flex flex-col gap-6 max-w-2xl mx-auto w-full">
+        <div className="flex flex-col gap-6 max-w-2xl mx-auto w-full p-2">
           <div className="flex flex-col md:flex-row gap-6 max-w-4xl mx-auto w-full">
             <div className="flex-1 flex flex-col justify-center items-center border rounded-lg p-4 shadow-md">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">

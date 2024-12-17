@@ -1,9 +1,7 @@
-import CustomSignOutButton from "@/components/sign-out-button";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
-import { ModeToggle } from "./theme-toggle";
 
 const myFont = localFont({
   // src: "../public/fonts/font.ttf",
@@ -23,13 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${myFont.className}  antialiased`}>
-        <Providers>
-          <div className="fixed z-50 top-2 sm:top-24 sm:left-6 left-28 w-2 h-2">
-            <ModeToggle />
-          </div>
-          <CustomSignOutButton />
-          {children}
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

@@ -45,22 +45,22 @@ export function BrothelSuccessTaskDialog({
   const handleCloseDialog = async () => {
     setShowEarnedGold(false);
 
-    await updateGoldMutation({ money: earnedGold });
-    await updateBrothelStatisticsMutation({
-      toUpdate: {
-        totalBrothelTaskCompleted: true,
-      },
-    });
-    await updateGoldStatisticsMutation({
-      toUpdate: {
-        goldSpent: 0,
-        goldEarned: earnedGold,
-      },
-    });
-    await updatePlayerBrothelStatusMutation({
-      brothelStatus: "idle",
-    });
-    router.replace("/brothel");
+    await Promise.all([
+      updatePlayerBrothelStatusMutation({ brothelStatus: "idle" }),
+      updateGoldMutation({ money: earnedGold }),
+      updateBrothelStatisticsMutation({
+        toUpdate: {
+          totalBrothelTaskCompleted: true,
+        },
+      }),
+      updateGoldStatisticsMutation({
+        toUpdate: {
+          goldSpent: 0,
+          goldEarned: earnedGold,
+        },
+      }),
+    ]);
+    router.refresh();
     setShowEarnedGold(false);
   };
 
