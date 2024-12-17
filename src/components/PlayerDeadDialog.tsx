@@ -26,12 +26,15 @@ export default function PlayerDeadDialog({
 }) {
   return (
     <AlertDialog open={isPlayerDead}>
-      <AlertDialogContent>
+      <AlertDialogContent className="w-11/12 max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-2xl">
+          <AlertDialogTitle className="text-xl sm:text-2xl">
             You are dead!
           </AlertDialogTitle>
-          <AlertDialogDescription asChild className="flex flex-col text-lg">
+          <AlertDialogDescription
+            asChild
+            className="flex flex-col text-base sm:text-lg"
+          >
             <div>
               <span className="flex flex-col gap-2">
                 <span>
@@ -45,6 +48,7 @@ export default function PlayerDeadDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogAction
+            className="w-full sm:w-auto"
             onClick={(event) => {
               const button = event.currentTarget;
               button.disabled = true;

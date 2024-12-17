@@ -12,10 +12,12 @@ export default function PlayerStatistics({
   return (
     <div
       className={
-        showDetails ? "flex w-full justify-evenly h-full  text-lg" : "hidden"
+        showDetails
+          ? "flex flex-wrap xl:flex-nowrap justify-center gap-4 w-full h-full text-lg mt-8"
+          : "hidden"
       }
     >
-      <div className="mb-4 w-max border h-fit flex flex-col justify-start items-start gap-2 px-6 py-2 ">
+      <div className="mb-4 w-full sm:w-1/2 md:w-1/3 lg:w-1/5 border flex flex-col justify-start items-start gap-2 px-6 py-2">
         <h3 className="text-2xl mt-2 border-b-2 mb-2 border-red-500 w-full text-center text-yellow-400">
           Gold
         </h3>
@@ -33,7 +35,7 @@ export default function PlayerStatistics({
         </p>
       </div>
 
-      <div className="mb-4 w-max border h-fit flex flex-col justify-start items-start gap-2 px-6 py-2 ">
+      <div className="mb-4 w-full sm:w-1/2 md:w-1/3 lg:w-1/5 border  flex flex-col justify-start items-start gap-2 px-6 py-2">
         <h3 className="text-2xl mt-2 border-b-2 mb-2 border-red-500 w-full text-center">
           Monsters
         </h3>
@@ -56,7 +58,7 @@ export default function PlayerStatistics({
         <p>Deity: {playerStatistics.monsters.monsterSpecificStats.diety}</p>
       </div>
 
-      <div className="mb-4 w-max border h-fit flex flex-col justify-start items-start gap-2 px-6 py-2 ">
+      <div className="mb-4 w-full sm:w-1/2 md:w-1/3 lg:w-1/5 border  flex flex-col justify-start items-start gap-2 px-6 py-2">
         <h3 className="text-2xl mt-2 border-b-2 mb-2 border-red-500 w-full text-center">
           Combat
         </h3>
@@ -79,7 +81,7 @@ export default function PlayerStatistics({
         </p>
       </div>
 
-      <div className="mb-4 w-max border h-fit flex flex-col justify-start items-start gap-2 px-6 py-2 ">
+      <div className="mb-4 w-full sm:w-1/2 md:w-1/3 lg:w-1/5 border  flex flex-col justify-start items-start gap-2 px-6 py-2">
         <h3 className="text-2xl mt-2 border-b-2 mb-2 border-red-500 w-full text-center">
           Brothel
         </h3>
@@ -90,13 +92,12 @@ export default function PlayerStatistics({
         <p>Tasks Failed: {playerStatistics.brothel.totalBrothelTasksFailed}</p>
       </div>
 
-      <div className="mb-4 w-max border h-fit flex flex-col justify-start items-start gap-2 px-6 py-2 ">
+      <div className="mb-4 w-full sm:w-1/2 md:w-1/3 lg:w-1/5 border  flex flex-col justify-start items-start gap-2 px-6 py-2">
         <h3 className="text-2xl mt-2 border-b-2 mb-2 border-red-500 w-full text-center">
           Potions
         </h3>
         <p>Total Bought: {playerStatistics.potions.totalPotionsBought}</p>
-        <div className="flex flex-col gap-0 border-2 py-2 px-1">
-          {" "}
+        <div className="flex flex-col justify-center items-center gap-0 border-2 py-2 px-1 w-full">
           <h4 className="text-lg mt-2">Healing Potions</h4>
           <p>
             Bought: {playerStatistics.potions.totalHealingPotionsBought}
@@ -104,7 +105,7 @@ export default function PlayerStatistics({
             Used: {playerStatistics.potions.totalHealingPotionsUsed}
           </p>
         </div>
-        <div className="flex flex-col gap-0 border-2 py-2 px-1">
+        <div className="flex flex-col justify-center items-center gap-0 border-2 py-2 px-1 w-full">
           <h4 className="text-lg mt-2">Healing Hi-Potions</h4>
           <p>
             Bought: {playerStatistics.potions.totalHealingHiPotionsBought}
@@ -112,16 +113,15 @@ export default function PlayerStatistics({
             Used: {playerStatistics.potions.totalHealingHiPotionsUsed}
           </p>
         </div>
-        <div className="flex flex-col gap-0 border-2 py-2 px-1">
+        <div className="flex flex-col justify-center items-center  gap-0 border-2 py-2 px-1 w-full">
           <h4 className="text-lg mt-2">Reroll Potions</h4>
-          <p>
+          <p className=" items-center">
             Bought: {playerStatistics.potions.totalRerollPotionsBought}
             {" | "}
             Used: {playerStatistics.potions.totalRerollPotionsUsed}
           </p>
         </div>
-        <div className="flex flex-col gap-0 border-2 py-2 px-1">
-          {" "}
+        <div className="flex flex-col justify-center items-center gap-0 border-2 py-2 px-1 w-full">
           <h4 className="text-lg mt-2">Special Potions</h4>
           <p>
             Bought: {playerStatistics.potions.totalSpecialPotionsBought}

@@ -221,7 +221,7 @@ export default function MonsterFightPage() {
   };
 
   return (
-    <div className="flex justify-center items-center">
+    <div className="container mx-auto px-4 py-8 flex flex-col justify-center min-h-screen">
       <EvilDeityVictoryScreen
         player={player}
         isLastBossDead={isLastBossDead}
@@ -298,15 +298,14 @@ export default function MonsterFightPage() {
             updatePlayerAfterDefeatingAMonsterMutation
           }
         />
-        <Button className="fixed" onClick={() => setShowItems(!showItems)}>
+        <Button
+          className="fixed top-2 right-4 sm:top-6 sm:right-12 lg:top-48 lg:left-12 lg:right-auto"
+          onClick={() => setShowItems(!showItems)}
+        >
           {showItems ? "Hide Items" : "Show Items"}
         </Button>
         <div
-          className={
-            showItems
-              ? "fixed top-1/3 right-16 grid grid-cols-2 gap-2"
-              : "hidden"
-          }
+          className={`fixed top-16 right-12 md:right-16 z-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-2 gap-2 ${showItems ? "" : "hidden"}`}
         >
           {player.items
             .sort(
@@ -315,7 +314,7 @@ export default function MonsterFightPage() {
             .map((item) => (
               <div
                 key={item.type}
-                className=" text-white border p-4 rounded aspect-square h-full w-full flex flex-col justify-evenly items-center gap-2 relative"
+                className="text-white border p-2 sm:p-4 rounded aspect-square flex flex-col justify-evenly items-center gap-1 sm:gap-2 relative"
               >
                 <Image
                   className="absolute w-full h-full blur-sm rounded-xl"
@@ -334,7 +333,7 @@ export default function MonsterFightPage() {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                <p className="z-10 ">{item.itemName}</p>
+                <p className="z-10 text-xs sm:text-sm">{item.itemName}</p>
                 {item.amount === 0 ? (
                   <p className=" z-10">
                     You have:{" "}
@@ -347,7 +346,7 @@ export default function MonsterFightPage() {
                   </p>
                 )}
                 <Button
-                  className="z-50"
+                  className="z-50 text-xs sm:text-sm"
                   onClick={() => {
                     if (item.type === "restore1" || item.type === "restore2") {
                       if (playerHp && levelStats) {
@@ -381,11 +380,11 @@ export default function MonsterFightPage() {
         <div className="flex flex-col gap-6 max-w-2xl mx-auto w-full">
           <div className="flex flex-col md:flex-row gap-6 max-w-4xl mx-auto w-full">
             <div className="flex-1 flex flex-col justify-center items-center border rounded-lg p-4 shadow-md">
-              <h1 className="text-2xl md:text-3xl font-bold mb-2">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">
                 {currentMonster.monster_type}
               </h1>
               <div className="w-full max-w-md flex flex-col">
-                <p className="text-end text-red-500 mb-1">
+                <p className="text-end text-red-500 mb-1 text-sm sm:text-base">
                   {monsterHp}/{currentMonster.hp}
                 </p>
                 <Progress
@@ -393,7 +392,7 @@ export default function MonsterFightPage() {
                   indicatorcolor="bg-red-500"
                 />
               </div>
-              <div className="mt-4 text-center">
+              <div className="mt-4 text-center text-sm sm:text-base">
                 <p>
                   Hp: <span className="text-red-500">{currentMonster.hp}</span>
                 </p>
@@ -425,7 +424,7 @@ export default function MonsterFightPage() {
                 {player.hasSpecialPotionEffect && (
                   <p
                     className="bg-gradient-to-r bg-clip-text  text-transparent 
-            from-blue-500 via-purple-500 to-indigo-500 absolute top-1/3 italic"
+            from-blue-500 via-purple-500 to-indigo-500 absolute top-1/4 sm:top-1/3 italic"
                   >
                     Special Potion Effect
                   </p>
@@ -513,14 +512,14 @@ export default function MonsterFightPage() {
 
           <div className="flex justify-center gap-4">
             <Button
-              className="w-1/6 py-2"
+              className="w-full sm:w-1/3 md:w-1/4 lg:w-1/6 py-2"
               onClick={() => setShowSuccessAttackDialog(true)}
             >
               Success
             </Button>
             <Button
               variant={"destructive"}
-              className="w-1/6 py-2"
+              className="w-full sm:w-1/3 md:w-1/4 lg:w-1/6 py-2"
               onClick={() => setShowFailAttackDialog(true)}
             >
               Fail

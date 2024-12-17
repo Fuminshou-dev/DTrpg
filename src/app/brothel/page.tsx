@@ -1,14 +1,16 @@
 "use client";
 
+import { ReturnToMainMenuButton } from "@/components/return-to-main-button";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useMutation, useQuery } from "convex/react";
-import Link from "next/link";
-import { redirect } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import { useRouter } from "next/navigation";
 
 export default function BrothelPage() {
+  const router = useRouter();
+  const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const customers = useQuery(api.customers.getAllCustomers);
   const allBrothelTasks = useQuery(api.customer_tasks.getCustomerTasks);
@@ -17,11 +19,7 @@ export default function BrothelPage() {
   );
 
   useEffect(() => {
-    if (!customers) {
-      setIsLoading(true);
-    } else {
-      setIsLoading(false);
-    }
+    setIsLoading(!customers);
   }, [customers]);
 
   const shuffledCustomers = useMemo(() => {
@@ -31,90 +29,73 @@ export default function BrothelPage() {
 
   return isLoading ? (
     <div className="flex flex-col h-screen justify-center items-center">
-      <LoadingSpinner className="size-72"></LoadingSpinner>
+      <LoadingSpinner className="w-24 h-24 md:w-72 md:h-72" />
     </div>
   ) : (
-    <div className="flex justify-center items-center h-screen container mx-auto">
-      <Button
-        className="fixed top-12 right-12"
-        onClick={() => redirect("/main")}
-      >
-        Return to main menu
-      </Button>
-      <div className="flex flex-col justify-center items-center gap-2">
-        <div className="flex flex-col justfy-center gap-4">
-          <div className={"grid grid-cols-3 gap-2"}>
-            {shuffledCustomers?.map((customer) => (
-              <div
-                className="flex justify-center h-fit items-center border rounded-lg"
-                key={customer._id}
-              >
-                <div className="flex flex-col justify-center items-center gap-4 p-4">
-                  <p className="text-3xl underline underline-offset-8 mb-4">
-                    {customer.customerType} customer
-                  </p>
-                  <div className="flex flex-col text-xl justify-center items-center text-center">
-                    {customer.price === 1 ? (
-                      <p>Pays the usual price</p>
-                    ) : (
-                      <p>
-                        Pays{" "}
-                        <span className="text-red-500">
-                          {" "}
-                          {customer.price}x{" "}
-                        </span>
-                        the price
-                      </p>
-                    )}
-                    {customer.task === 1 ? (
-                      <p>
-                        You do the task
-                        <span className="text-green-500">
-                          {" "}
-                          {customer.task}{" "}
-                        </span>
-                        time
-                      </p>
-                    ) : (
-                      <p>
-                        You do the task
-                        <span className="text-red-500">
-                          {" "}
-                          {customer.task}
-                        </span>{" "}
-                        times
-                      </p>
-                    )}
-                  </div>
-                </div>
+    <div className="flex flex-col justify-center items-center min-h-screen p-4 md:p-8">
+      <ReturnToMainMenuButton />
+      <div className="w-full max-w-6xl space-y-8 mt-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {shuffledCustomers?.map((customer) => (
+            <div
+              className="border rounded-lg p-4 flex flex-col items-center text-center"
+              key={customer._id}
+            >
+              <p className="text-xl md:text-2xl font-semibold mb-2">
+                {customer.customerType} customer
+              </p>
+              <div className="text-sm md:text-base">
+                <p>
+                  Pays{" "}
+                  <span className={customer.price === 1 ? "" : "text-red-500"}>
+                    {customer.price}x
+                  </span>{" "}
+                  the price
+                </p>
+                <p>
+                  You do the task{" "}
+                  <span
+                    className={
+                      customer.task === 1 ? "text-green-500" : "text-red-500"
+                    }
+                  >
+                    {customer.task}
+                  </span>{" "}
+                  time{customer.task !== 1 && "s"}
+                </p>
               </div>
-            ))}
-          </div>
-          <div className="border rounded-lg w-full  flex flex-col justify-center items-center p-8">
-            <h1 className="text-3xl">Possible tasks:</h1>
-            <ul className="flex-col gap-4 justify-center items-center list-disc list-item">
-              {allBrothelTasks?.map((el) => (
-                <li key={el._id} className="text-xl">
-                  {el.task} -{" "}
-                  {<span className="text-yellow-500">{el.gold}</span>} Gold
-                </li>
-              ))}
-            </ul>
-          </div>
+            </div>
+          ))}
         </div>
-        <div className="flex justify-center items-center">
+        <div className="border rounded-lg p-4 md:p-8">
+          <h1 className="text-2xl md:text-3xl font-bold mb-4 text-center">
+            Possible tasks:
+          </h1>
+          <ul className="list-disc list-inside space-y-2">
+            {allBrothelTasks?.map((el) => (
+              <li key={el._id} className="text-base md:text-xl">
+                {el.task} - <span className="text-yellow-500">{el.gold}</span>{" "}
+                Gold
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="flex justify-center">
           <Button
-            onClick={() => {
-              updateBrothelStatisticsMutation({
+            onClick={async () => {
+              setIsButtonLoading(true);
+              router.push("/brothel/serve");
+              await updateBrothelStatisticsMutation({
                 toUpdate: {
                   totalBrothlelTask: true,
                 },
               });
+              setIsButtonLoading(false);
             }}
-            className="w-24 h-12"
-            asChild
+            className="w-full sm:w-auto px-8 py-3 text-lg"
+            disabled={isButtonLoading}
           >
-            <Link href={"/brothel/serve"}>Serve</Link>
+            Serve
           </Button>
         </div>
       </div>

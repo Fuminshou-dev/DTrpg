@@ -10,7 +10,7 @@ import restore1 from "@/public/restore1.jpg";
 import restore2 from "@/public/restore2.jpg";
 import special from "@/public/special.jpg";
 
-import { useRouter } from "next/navigation";
+import { ReturnToMainMenuButton } from "@/components/return-to-main-button";
 import { api } from "../../../convex/_generated/api";
 
 const itemImages: { [key: string]: StaticImageData } = {
@@ -31,7 +31,6 @@ export default function ShopPage() {
   const updateGoldStatisticsMutation = useMutation(
     api.player_statistics.updateGoldStatistics
   );
-  const router = useRouter();
   const player = useQuery(api.players.getPlayer);
   const buyItem = useMutation(api.shop.buyItem);
   const handleItemBuy = async ({
@@ -85,35 +84,28 @@ export default function ShopPage() {
   }
 
   return (
-    <div className="container mx-auto flex justify-center items-center h-screen w-screen">
-      <div className="flex flex-col gap-4">
-        <Button
-          className="flex p-4 text-lg"
-          variant={"outline"}
-          onClick={() => {
-            router.push("/main");
-          }}
-        >
-          Go back
-        </Button>
-        <div className="flex w-full flex-1 gap-2">
+    <div className="container mx-auto flex justify-center items-center min-h-screen py-8 px-4">
+      <div className="flex flex-col gap-4 w-full max-w-6xl mt-8">
+        <ReturnToMainMenuButton />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {items?.map((item) => (
             <div
               key={item._id}
-              className="flex flex-col gap-4 text-center justify-evenly items-center border p-4 rounded-lg w-full max-h-sm max-w-sm"
+              className="flex flex-col gap-4 text-center justify-evenly items-center border p-4 rounded-lg w-full"
             >
-              <h1 className="text-2xl">{item.item}</h1>
+              <h1 className="text-xl sm:text-2xl">{item.item}</h1>
               <Image
                 className="rounded-lg"
                 width={70}
+                height={70}
                 src={itemImages[item.type]}
                 alt={item.item}
               ></Image>
-              <p className="text-center">{item.effectDescription}</p>
-              <p className="text-xl">
+              <p className="text-sm sm:text-base">{item.effectDescription}</p>
+              <p className="text-lg sm:text-xl">
                 Cost: <span className="text-yellow-400">{item.price}</span> Gold
               </p>
-              <p className="text-xl">
+              <p className="text-lg sm:text-xl">
                 You have{" "}
                 {player.items.map((el) =>
                   el.type === item.type ? (
@@ -155,10 +147,12 @@ export default function ShopPage() {
                   Buy
                 </Button>
                 {errorItemType === item.type && (
-                  <p className="text-red-500">Not enough gold</p>
+                  <p className="text-red-500 text-sm">Not enough gold</p>
                 )}
                 {successItemType === item.type && (
-                  <p className="text-green-500">Successfully bought an item</p>
+                  <p className="text-green-500 text-sm">
+                    Successfully bought an item
+                  </p>
                 )}
               </div>
             </div>

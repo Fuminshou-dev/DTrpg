@@ -1,6 +1,6 @@
 import {
   AlertDialog,
-  AlertDialogCancel,
+  AlertDialogAction,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -40,6 +40,8 @@ export function BrothelSuccessTaskDialog({
 
   const handleCloseDialog = async () => {
     setShowEarnedGold(false);
+    router.replace("/brothel");
+
     await updateGoldMutation({ money: earnedGold });
     await updateBrothelStatisticsMutation({
       toUpdate: {
@@ -52,7 +54,7 @@ export function BrothelSuccessTaskDialog({
         goldEarned: earnedGold,
       },
     });
-    router.replace("/brothel");
+    setShowEarnedGold(false);
   };
 
   return (
@@ -72,7 +74,7 @@ export function BrothelSuccessTaskDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel asChild>
+          <AlertDialogAction asChild>
             <Button
               variant={"destructive"}
               className="bg-green-400 hover:bg-green-600"
@@ -80,7 +82,7 @@ export function BrothelSuccessTaskDialog({
             >
               OK
             </Button>
-          </AlertDialogCancel>
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

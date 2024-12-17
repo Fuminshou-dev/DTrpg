@@ -33,7 +33,6 @@ const githubIcon = (
 );
 export default function Home() {
   const { isSignedIn } = useAuth();
-
   const [isExplainRules, setExplainRules] = useState(false);
   const router = useRouter();
   const [isAdult, setIsAdult] = useState(false);
@@ -48,14 +47,14 @@ export default function Home() {
   }, [isSignedIn, setIsAdult]);
 
   return (
-    <div className="h-screen w-screen container mx-auto relative">
+    <div className="min-h-screen w-full container mx-auto relative px-4 py-8">
       <Link
         target="_blank"
         rel="noopener noreferrer"
         href={"https://github.com/Fuminshou-dev/dprpg"}
         className="absolute top-4 right-4 z-10"
       >
-        <div className="size-12 rounded-lg p-4 border border-black border-spacing-12 dark:bg-white">
+        <div className="size-8 sm:size-12 rounded-lg p-2 sm:p-4 border border-black border-spacing-12 dark:bg-white">
           {githubIcon}
         </div>
       </Link>
@@ -82,15 +81,13 @@ export default function Home() {
         </AlertDialogContent>
       </AlertDialog>
       <div
-        className={
-          isAdult
-            ? "h-screen flex flex-col justify-center items-center gap-8"
-            : "blur h-screen flex flex-col justify-center items-center gap-8"
-        }
+        className={`${
+          isAdult ? "" : "blur"
+        } min-h-screen flex flex-col justify-center items-center gap-8`}
       >
-        <div className="flex flex-col gap-8 justify-center items-center text-center tracking-tighter ">
-          <h1 className="text-5xl">DT RPG GAME</h1>
-          <h2 className="text-2xl">
+        <div className="flex flex-col gap-6 sm:gap-8 justify-center items-center text-center tracking-tighter max-w-4xl">
+          <h1 className="text-3xl sm:text-5xl">DT RPG GAME</h1>
+          <h2 className="text-lg sm:text-2xl">
             Monsters are attacking! Over 100 years have passed since the{" "}
             <span className="text-red-500">Demon Queen</span> was defeated by
             the <span className="text-yellow-200">Hero</span>. Now, the world is
@@ -107,7 +104,7 @@ export default function Home() {
             <span className="text-red-500">Dark Priest</span> and stop the
             summoning of the <span className="text-red-500">evil deity</span>.
           </h2>
-          <h3 className="text-3xl">
+          <h3 className="text-xl sm:text-3xl">
             Only <span className="font-bold italic">you</span> can save the
             world.
           </h3>
@@ -116,17 +113,22 @@ export default function Home() {
           variant={"secondary"}
           size={"lg"}
           onClick={() => setExplainRules(true)}
+          className="text-base sm:text-lg"
         >
           Start the game
         </Button>
       </div>
       <AlertDialog open={isExplainRules}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-lg h-full overflow-y-scroll sm:h-fit sm:max-w-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>The rules of the game</AlertDialogTitle>
-            <AlertDialogDescription className="flex flex-col gap-2 text-center">
-              <span className="text-xl">Your goal</span>
-              <span className="text">
+            <AlertDialogTitle className="text-xl sm:text-2xl">
+              The rules of the game
+            </AlertDialogTitle>
+            <AlertDialogDescription className="flex flex-col gap-4 text-center text-sm sm:text-base">
+              <span className="text-lg sm:text-xl font-semibold">
+                Your goal
+              </span>
+              <span>
                 Your goal is to defeat the{" "}
                 <span className="text-red-500">Dark Priest</span> and stop the
                 summoning of the{" "}
@@ -134,7 +136,7 @@ export default function Home() {
                 monsters, level up, and aim to bring down the{" "}
                 <span className="text-red-500">Dark Priest</span>.
               </span>
-              <span className="text-xl">Battle</span>
+              <span className="text-lg sm:text-xl font-semibold">Battle</span>
               <span>
                 In battle, if you reduce the monster's{" "}
                 <span className="text-blue-500">HP</span> to zero before your
@@ -148,24 +150,19 @@ export default function Home() {
                 on the monster you defeated. Once you earn enough{" "}
                 <span className="text-purple-500">EXP</span>, you will level up,
                 and your <span className="text-blue-500">HP</span> and base
-                attack power will increase. <br />
-                <span>
-                  You can battle any monster you've defeated as many times as
-                  you like. If an enemy is too strong to defeat, fight
-                  previously defeated monsters to level up.
-                </span>
+                attack power will increase.
+                <br />
+                You can battle any monster you've defeated as many times as you
+                like. If an enemy is too strong to defeat, fight previously
+                defeated monsters to level up.
               </span>
-              <span className="text-xl">Shop</span>
+              <span className="text-lg sm:text-xl font-semibold">Shop</span>
               <span>
                 In the shop, you can buy items that will aid you in battle. You
                 can earn <span className="text-yellow-400">money</span> by
-                defeating monsters or working at the brothel. Brothel In the
-                brothel, unlike in battle, you won't gain experience points, but
-                you can earn more <span className="text-yellow-400">money</span>{" "}
-                than you would from battle. You can work at the brothel as many
-                times as you like during your adventure.
+                defeating monsters or working at the brothel.
               </span>
-              <span className="text-xl">Brothel</span>
+              <span className="text-lg sm:text-xl font-semibold">Brothel</span>
               <span>
                 In the brothel, unlike in battle, you won't gain{" "}
                 <span className="text-purple-500">EXP</span>, but you can earn

@@ -24,7 +24,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${myFont.className}  antialiased`}>
         <Providers>
-          <div className="fixed z-50 top-24 left-6">
+          <div className="fixed z-50 top-2 sm:top-24 sm:left-6 left-28 w-2 h-2">
             <ModeToggle />
           </div>
           <CustomSignOutButton />

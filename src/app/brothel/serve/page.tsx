@@ -104,6 +104,7 @@ export default function ServePage() {
             <Button
               size={"lg"}
               variant={"default"}
+              disabled={showEarnedGold}
               onClick={() => {
                 setShowEarnedGold(true);
               }}

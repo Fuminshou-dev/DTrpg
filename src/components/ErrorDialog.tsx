@@ -23,22 +23,26 @@ export default function ErrorDialog({
 }) {
   return (
     <AlertDialog defaultOpen={false} open={showError}>
-      <AlertDialogContent>
+      <AlertDialogContent className="max-w-[90vw] w-full sm:max-w-[425px]">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-2xl">Error!</AlertDialogTitle>
-          <AlertDialogDescription asChild className="flex flex-col text-lg">
-            <div>
+          <AlertDialogTitle className="text-xl sm:text-2xl">
+            Error!
+          </AlertDialogTitle>
+          <AlertDialogDescription
+            asChild
+            className="flex flex-col text-base sm:text-lg"
+          >
+            <div className="max-h-[60vh] overflow-y-auto">
               <p>{errorMsg}</p>
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogAction
+            className="w-full sm:w-auto"
             onClick={() => {
-              {
-                setShowError(false);
-                setErrorMsg("");
-              }
+              setShowError(false);
+              setErrorMsg("");
             }}
           >
             Continue

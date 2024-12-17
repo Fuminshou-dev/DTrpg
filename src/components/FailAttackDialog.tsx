@@ -91,50 +91,59 @@ export default function FailDialog({
 
   return (
     <AlertDialog open={showFailAttackDialog}>
-      <AlertDialogContent>
+      <AlertDialogContent className="max-w-full sm:max-w-[425px]">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-2xl">
+          <AlertDialogTitle className="text-xl sm:text-2xl">
             You are a failure!
           </AlertDialogTitle>
-          <AlertDialogDescription asChild className="flex flex-col text-lg">
+          <AlertDialogDescription
+            asChild
+            className="flex flex-col text-base sm:text-lg"
+          >
             <div>
               <span>You have failed the task. What a pity.</span>
-              <Table className="mt-8">
+              <Table className="mt-4 sm:mt-8">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-3xl"></TableHead>
-                    <TableHead className="text-3xl text-green-500">
-                      Player
-                    </TableHead>
-                    <TableHead className="text-3xl text-red-500">
+                    <TableHead className="text-xl sm:text-3xl"></TableHead>
+                    <TableHead className="text-xl sm:text-3xl text-red-500">
                       {monster.monster_type}
+                    </TableHead>
+                    <TableHead className="text-xl sm:text-3xl text-green-500">
+                      Player
                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell className="text-2xl">Attack</TableCell>
-                    <TableCell className="text-2xl text-red-500">0</TableCell>
-                    <TableCell className="text-2xl text-red-500">
+                    <TableCell className="text-lg sm:text-2xl">
+                      Attack
+                    </TableCell>
+                    <TableCell className="text-lg sm:text-2xl text-red-500">
                       {monsterAtk}
                     </TableCell>
+                    <TableCell className="text-lg sm:text-2xl text-red-500">
+                      0
+                    </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="text-2xl">HP</TableCell>
-                    <TableCell className="text-2xl text-green-500">
+                    <TableCell className="text-lg sm:text-2xl">HP</TableCell>
+                    <TableCell className="text-lg sm:text-2xl text-red-500">
+                      {monsterHp}
+                    </TableCell>
+                    <TableCell className="text-lg sm:text-2xl text-green-500">
                       {playerHp}
                     </TableCell>
-                    <TableCell className="text-2xl text-red-500">
-                      {monsterHp}
-                    </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="text-2xl">New HP</TableCell>
-                    <TableCell className="text-2xl text-green-500">
-                      {playerHp - monsterAtk}
+                    <TableCell className="text-lg sm:text-2xl">
+                      New HP
                     </TableCell>
-                    <TableCell className="text-2xl text-red-500">
+                    <TableCell className="text-lg sm:text-2xl text-red-500">
                       {monsterHp}
+                    </TableCell>
+                    <TableCell className="text-lg sm:text-2xl text-green-500">
+                      {playerHp - monsterAtk}
                     </TableCell>
                   </TableRow>
                 </TableBody>

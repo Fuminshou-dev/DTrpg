@@ -46,36 +46,35 @@ export default function MonsterDeadDialog({
     (player.hasSpecialPotionEffect ? monster.exp * 2 : monster.exp);
   return (
     <AlertDialog open={isMonsterDead}>
-      <AlertDialogContent>
+      <AlertDialogContent className="p-4 sm:p-6 md:p-8 w-[95%] max-w-[500px] max-h-[90vh] mx-auto rounded-lg flex flex-col">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-2xl">
+          <AlertDialogTitle className="text-xl sm:text-2xl md:text-3xl text-center">
             Congratulations! You have defeated the monster!
           </AlertDialogTitle>
-          <AlertDialogDescription asChild className="flex flex-col text-lg">
+          <AlertDialogDescription
+            asChild
+            className="flex flex-col text-sm sm:text-base md:text-lg lg:text-xl"
+          >
             <div>
               {newPlayerExp < nextLevelStats.required_exp && (
-                <Table className="mt-8">
+                <Table className="mt-8 w-full text-xs sm:text-sm md:text-base lg:text-lg">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-3xl">Stat</TableHead>
-                      <TableHead className="text-3xl text-orange-400">
-                        Gained
-                      </TableHead>
-                      <TableHead className="text-3xl text-green-500">
-                        New
-                      </TableHead>
+                      <TableHead className="">Stat</TableHead>
+                      <TableHead className=" text-orange-400">Gained</TableHead>
+                      <TableHead className=" text-green-500">New</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell className="text-2xl">Exp</TableCell>
-                      <TableCell className="text-2xl text-orange-500">
+                      <TableCell className="text-orange-500">Exp</TableCell>
+                      <TableCell className=" text-orange-500">
                         {player.hasSpecialPotionEffect
                           ? monster.exp * 2
                           : monster.exp}{" "}
                         XP
                       </TableCell>
-                      <TableCell className="text-2xl text-orange-500">
+                      <TableCell className=" text-orange-500">
                         {newPlayerExp < 543 || player.level !== 8 ? (
                           <span>{newPlayerExp} XP</span>
                         ) : (
@@ -84,12 +83,12 @@ export default function MonsterDeadDialog({
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell className="text-2xl">Gold</TableCell>
-                      <TableCell className="text-2xl">
+                      <TableCell className="">Gold</TableCell>
+                      <TableCell className="">
                         <span className="text-yellow-400">{monster.gold} </span>
                         GOLD
                       </TableCell>
-                      <TableCell className="text-2xl">
+                      <TableCell className="">
                         <span className="text-yellow-400">
                           {player.gold + monster.gold}{" "}
                         </span>
@@ -97,9 +96,9 @@ export default function MonsterDeadDialog({
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell className="text-2xl">Attack</TableCell>
-                      <TableCell className="text-2xl text-green-500"></TableCell>
-                      <TableCell className="text-2xl">
+                      <TableCell className="">Attack</TableCell>
+                      <TableCell className=" text-green-500"></TableCell>
+                      <TableCell className="">
                         <span className=" text-green-500">
                           {levelStats.atk}{" "}
                         </span>{" "}
@@ -107,17 +106,17 @@ export default function MonsterDeadDialog({
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell className="text-2xl">Hp</TableCell>
-                      <TableCell className="text-2xl text-green-500"></TableCell>
-                      <TableCell className="text-2xl">
+                      <TableCell className="">Hp</TableCell>
+                      <TableCell className=" text-green-500"></TableCell>
+                      <TableCell className="">
                         <span className="text-red-500">{levelStats.hp} </span>
                         HP
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell className="text-2xl">Level</TableCell>
-                      <TableCell className="text-2xl text-green-500"></TableCell>
-                      <TableCell className="text-2xl text-red-500">
+                      <TableCell className="">Level</TableCell>
+                      <TableCell className=" text-green-500"></TableCell>
+                      <TableCell className=" text-red-500">
                         {player.level}
                       </TableCell>
                     </TableRow>
@@ -144,8 +143,8 @@ export default function MonsterDeadDialog({
                     </TableHeader>
                     <TableBody>
                       <TableRow>
-                        <TableCell className="text-2xl">Exp</TableCell>
-                        <TableCell className="text-2xl">
+                        <TableCell className="">Exp</TableCell>
+                        <TableCell className="">
                           <span className=" text-orange-500">
                             {player.hasSpecialPotionEffect
                               ? monster.exp * 2
@@ -153,7 +152,7 @@ export default function MonsterDeadDialog({
                           </span>
                           XP
                         </TableCell>
-                        <TableCell className="text-2xl">
+                        <TableCell className="">
                           <span className=" text-orange-500">
                             {newPlayerExp < 543 || player.level !== 8 ? (
                               <span>{newPlayerExp} XP</span>
@@ -166,14 +165,14 @@ export default function MonsterDeadDialog({
                         </TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell className="text-2xl">Gold</TableCell>
-                        <TableCell className="text-2xl">
+                        <TableCell className="">Gold</TableCell>
+                        <TableCell className="">
                           <span className="text-yellow-400">
                             {monster.gold}{" "}
                           </span>
                           GOLD
                         </TableCell>
-                        <TableCell className="text-2xl">
+                        <TableCell className="">
                           <span className="text-yellow-400">
                             {player.gold + monster.gold}{" "}
                           </span>
@@ -181,14 +180,14 @@ export default function MonsterDeadDialog({
                         </TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell className="text-2xl">Attack</TableCell>
-                        <TableCell className="text-2xl">
+                        <TableCell className="">Attack</TableCell>
+                        <TableCell className="">
                           <span className=" text-green-500">
                             {nextLevelStats.atk - levelStats.atk}
                           </span>{" "}
                           atk
                         </TableCell>
-                        <TableCell className="text-2xl">
+                        <TableCell className="">
                           <span className=" text-green-500">
                             {nextLevelStats.atk}{" "}
                           </span>{" "}
@@ -196,14 +195,14 @@ export default function MonsterDeadDialog({
                         </TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell className="text-2xl">Hp</TableCell>
-                        <TableCell className="text-2xl">
+                        <TableCell className="">Hp</TableCell>
+                        <TableCell className="">
                           <span className="text-green-500">
                             {nextLevelStats.hp - levelStats.hp}
                           </span>{" "}
                           Hp
                         </TableCell>
-                        <TableCell className="text-2xl">
+                        <TableCell className="">
                           <span className="text-red-500">
                             {nextLevelStats.hp}{" "}
                           </span>
@@ -211,11 +210,9 @@ export default function MonsterDeadDialog({
                         </TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell className="text-2xl">Level</TableCell>
-                        <TableCell className="text-2xl text-green-500">
-                          1
-                        </TableCell>
-                        <TableCell className="text-2xl text-red-500">
+                        <TableCell className="">Level</TableCell>
+                        <TableCell className=" text-green-500">1</TableCell>
+                        <TableCell className=" text-red-500">
                           {player.level + 1}
                         </TableCell>
                       </TableRow>
@@ -224,13 +221,13 @@ export default function MonsterDeadDialog({
                 </span>
               )}
               {player.currentMonster === monster.showId && (
-                <span className="text-2xl text-center text-red-100 border border-pink-200 my-2">
+                <span className=" text-center text-red-100 border border-pink-200 my-2">
                   Another monster has been unlocked. You can fight them on the
                   fight page.
                 </span>
               )}
               {player.hasSpecialPotionEffect && (
-                <span className="text-red-500 text-2xl text-center border border-red-400 my-2">
+                <span className="text-red-500  text-center border border-red-400 my-2">
                   You Special Potion has wore off.
                 </span>
               )}
@@ -239,6 +236,7 @@ export default function MonsterDeadDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogAction
+            className="text-sm sm:text-base md:text-lg px-4 py-2 sm:px-6 sm:py-3"
             onClick={(event) => {
               const button = event.currentTarget;
               button.disabled = true;
