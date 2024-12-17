@@ -29,10 +29,9 @@ import {
   updatePlayerFightStatus,
 } from "../utils/utilFunctions";
 
-// TODO: implement victory screen if monsterId = 6 ( EVIL DEITY )
-
 export default function MonsterFightPage() {
   const player = useQuery(api.players.getPlayer);
+  const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [showFailAttackDialog, setShowFailAttackDialog] = useState(false);
   const [showSuccessAttackDialog, setShowSuccessAttackDialog] = useState(false);
   const [isPlayerDead, setIsPlayedDead] = useState(false);
@@ -134,6 +133,7 @@ export default function MonsterFightPage() {
     >;
     hasSpecialPotionEffect: boolean;
   }) => {
+    setIsButtonLoading(true);
     const result = await updatePlayerItemsAfterUseMutation({
       itemType: itemType,
     });
@@ -141,6 +141,9 @@ export default function MonsterFightPage() {
     if (!result.success) {
       setShowError(true);
       setErrorMsg(result.message);
+      setTimeout(() => {
+        setIsButtonLoading(false);
+      }, 1000); // 1 second timeout
       return;
     }
 
@@ -162,6 +165,10 @@ export default function MonsterFightPage() {
       playerHp: playerHp,
       updatePlayerFightStatusMutation,
     });
+
+    setTimeout(() => {
+      setIsButtonLoading(false);
+    }, 1000); // 1 second timeout
   };
 
   const handleUseHealingItem = async (
@@ -169,6 +176,7 @@ export default function MonsterFightPage() {
     playerMaxHp: number,
     itemType: itemTypes
   ) => {
+    setIsButtonLoading(true);
     const healAmount = calculateHealAmount({
       itemType,
       playerCurrentHp,
@@ -176,18 +184,19 @@ export default function MonsterFightPage() {
     });
 
     if (itemType === "reroll" || itemType === "special") {
+      setIsButtonLoading(false);
       return;
     }
 
     if (playerCurrentHp === playerMaxHp) {
       setErrorMsg("You already have full health. Item wasn't used.");
       setShowError(true);
+      setIsButtonLoading(false);
       return;
     }
 
     console.log(`Healed by ${healAmount}`);
     if (healAmount && healAmount > 0 && playerFightStatus) {
-      // Only heal if amount is positive
       const newPlayerHp = Math.min(playerCurrentHp + healAmount, playerMaxHp);
       await updatePlayerItemsAfterUseMutation({
         itemType: itemType,
@@ -218,6 +227,8 @@ export default function MonsterFightPage() {
     } else {
       console.log("No healing performed");
     }
+
+    setIsButtonLoading(false);
   };
 
   return (
@@ -304,6 +315,7 @@ export default function MonsterFightPage() {
         >
           {showItems ? "Hide Items" : "Show Items"}
         </Button>
+
         <div
           className={`fixed top-16 right-12 md:right-16 z-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-2 gap-2 ${showItems ? "" : "hidden"}`}
         >
@@ -368,7 +380,11 @@ export default function MonsterFightPage() {
                       });
                     }
                   }}
-                  disabled={item.amount === 0 || item.type === "special"}
+                  disabled={
+                    item.amount === 0 ||
+                    item.type === "special" ||
+                    isButtonLoading
+                  }
                   size={"sm"}
                 >
                   Use
@@ -514,11 +530,13 @@ export default function MonsterFightPage() {
             <Button
               className="w-full sm:w-1/3 md:w-1/4 lg:w-1/6 py-2"
               onClick={() => setShowSuccessAttackDialog(true)}
+              disabled={isButtonLoading}
             >
               Success
             </Button>
             <Button
               variant={"destructive"}
+              disabled={isButtonLoading}
               className="w-full sm:w-1/3 md:w-1/4 lg:w-1/6 py-2"
               onClick={() => setShowFailAttackDialog(true)}
             >

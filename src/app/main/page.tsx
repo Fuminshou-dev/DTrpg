@@ -76,7 +76,7 @@ function BrothelButton({
   );
 }
 
-export default function Game() {
+export default function MainPage() {
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
   const [showItems, setShowItems] = useState(false);

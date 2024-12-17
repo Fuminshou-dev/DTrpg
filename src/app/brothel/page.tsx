@@ -13,29 +13,83 @@ export default function BrothelPage() {
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const customers = useQuery(api.customers.getAllCustomers);
+  const task = useQuery(api.customer_tasks.getRandomTask);
   const allBrothelTasks = useQuery(api.customer_tasks.getCustomerTasks);
   const updateBrothelStatisticsMutation = useMutation(
     api.player_statistics.updateBrothelStatistics
   );
+  const updateBrothelStatusMutation = useMutation(
+    api.players.updateBrothelStatus
+  );
 
   useEffect(() => {
-    setIsLoading(!customers);
-  }, [customers]);
+    if (!customers || !task || task === undefined) {
+      setIsLoading(true);
+    } else setIsLoading(false);
+  }, [customers, task]);
 
   const shuffledCustomers = useMemo(() => {
     if (!customers) return [];
     return [...customers].sort(() => Math.random() - 0.5);
   }, [customers]);
 
+  function getRandomCustomer() {
+    if (!customers) return;
+    if (customers) {
+      const timestamp = Date.now();
+      const randomIndex = Math.floor(
+        (timestamp % 1000) / (1000 / customers.length)
+      );
+      return customers[randomIndex];
+    }
+  }
+
+  const handleBrothelButtonClick = async () => {
+    setIsButtonLoading(true);
+    const randomCustomer = getRandomCustomer();
+
+    try {
+      if (task && randomCustomer) {
+        await updateBrothelStatusMutation({
+          brothelStatus: {
+            status: "hasBrothelTask",
+            currentTask: {
+              customer: {
+                customerType: randomCustomer.customerType,
+                price: randomCustomer.price,
+                task: randomCustomer.task,
+              },
+              task: {
+                gold: task.gold,
+                task: task.task,
+              },
+            },
+          },
+        });
+        await updateBrothelStatisticsMutation({
+          toUpdate: {
+            totalBrothlelTask: true,
+          },
+        });
+      }
+      router.refresh();
+    } finally {
+      // Add a delay before enabling the button again
+      setTimeout(() => {
+        setIsButtonLoading(false);
+      }, 3000); // Adjust the delay time as needed
+    }
+  };
+
   return isLoading ? (
     <div className="flex flex-col h-screen justify-center items-center">
       <LoadingSpinner className="w-24 h-24 md:w-72 md:h-72" />
     </div>
   ) : (
-    <div className="flex flex-col justify-center items-center min-h-screen p-4 md:p-8">
+    <div className="flex flex-col justify-center items-center h-screen sm:min-h-screen p-4 md:p-8">
       <ReturnToMainMenuButton />
-      <div className="w-full max-w-6xl space-y-8 mt-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="w-full max-w-6xl space-y-2 sm:mt-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {shuffledCustomers?.map((customer) => (
             <div
               className="border rounded-lg p-4 flex flex-col items-center text-center"
@@ -67,7 +121,7 @@ export default function BrothelPage() {
             </div>
           ))}
         </div>
-        <div className="border rounded-lg p-4 md:p-8">
+        <div className="flex flex-col border rounded-lg p-4">
           <h1 className="text-2xl md:text-3xl font-bold mb-4 text-center">
             Possible tasks:
           </h1>
@@ -82,20 +136,11 @@ export default function BrothelPage() {
         </div>
         <div className="flex justify-center">
           <Button
-            onClick={async () => {
-              setIsButtonLoading(true);
-              router.push("/brothel/serve");
-              await updateBrothelStatisticsMutation({
-                toUpdate: {
-                  totalBrothlelTask: true,
-                },
-              });
-              setIsButtonLoading(false);
-            }}
+            onClick={handleBrothelButtonClick}
             className="w-full sm:w-auto px-8 py-3 text-lg"
             disabled={isButtonLoading}
           >
-            Serve
+            {isButtonLoading ? "Processing..." : "Serve"}
           </Button>
         </div>
       </div>

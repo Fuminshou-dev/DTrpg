@@ -12,8 +12,6 @@ export default function ServePage() {
   const updateGoldMutation = useMutation(
     api.customer_tasks.completedBrothelTask
   );
-  const customer = useQuery(api.customers.getRandomCustomer);
-  const task = useQuery(api.customer_tasks.getRandomTask);
   const [showEarnedGold, setShowEarnedGold] = useState(false);
   const player = useQuery(api.players.getPlayer);
   const [showFailTaskDialog, setShowFailTaskDialog] = useState(false);
@@ -26,6 +24,19 @@ export default function ServePage() {
   const updateGoldStatisticsMutation = useMutation(
     api.player_statistics.updateGoldStatistics
   );
+  const updatePlayerBrothelStatusMutation = useMutation(
+    api.players.updateBrothelStatus
+  );
+
+  if (typeof player?.brothelStatus === "string") {
+    return (
+      <div className="container mx-auto flex flex-col h-screen justify-center items-center">
+        <LoadingSpinner className="size-72" />
+      </div>
+    );
+  }
+  const customerObject = player?.brothelStatus?.currentTask.customer;
+  const taskObject = player?.brothelStatus?.currentTask.task;
 
   if (!player) {
     return (
@@ -35,24 +46,27 @@ export default function ServePage() {
     );
   }
 
-  if (!customer || !task) {
+  if (!customerObject || !taskObject) {
     return (
       <div className="container mx-auto flex flex-col h-screen justify-center items-center">
         <LoadingSpinner className="size-72" />
       </div>
     );
   }
-  const earnedGold = task.gold * customer.price;
+  const earnedGold = taskObject.gold * customerObject.price;
 
   return (
     <div className="container mx-auto flex flex-col h-screen justify-center items-center gap-4">
-      {!customer || !task ? (
+      {!customerObject || !taskObject ? (
         <div className="block">
           <LoadingSpinner className="size-24"></LoadingSpinner>
         </div>
       ) : (
         <div className={showEarnedGold ? "blur" : "flex flex-col gap-8"}>
           <BrothelSuccessTaskDialog
+            updatePlayerBrothelStatusMutation={
+              updatePlayerBrothelStatusMutation
+            }
             updateGoldStatisticsMutation={updateGoldStatisticsMutation}
             updateBrothelStatisticsMutation={updateBrothelStatisticsMutation}
             updateGoldMutation={updateGoldMutation}
@@ -72,24 +86,26 @@ export default function ServePage() {
               <div>
                 Your customer is:{" "}
                 <span className="text-red-500 text-2xl">
-                  {customer.customerType}
+                  {customerObject.customerType}
                 </span>{" "}
                 customer
               </div>
               <p>
                 He is going to make you do the task{" "}
-                <span className="text-red-500">{customer.task}x</span> time
+                <span className="text-red-500">{customerObject.task}x</span>{" "}
+                time
               </p>
               <p>
                 And will pay you{" "}
-                <span className="text-red-500">{customer.price}x</span> the gold
+                <span className="text-red-500">{customerObject.price}x</span>{" "}
+                the gold
               </p>
             </div>
           </div>
           <div className="border rounded-lg p-12 flex flex-col items-center justify-center gap-8">
-            <h1 className="text-2xl">Task: {task.task}</h1>
-            {customer.task !== 1 ? (
-              <p>You also have to do the task {customer.task} times</p>
+            <h1 className="text-2xl">Task: {taskObject.task}</h1>
+            {customerObject.task !== 1 ? (
+              <p>You also have to do the task {customerObject.task} times</p>
             ) : (
               <></>
             )}

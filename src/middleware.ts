@@ -41,6 +41,21 @@ export default clerkMiddleware(async (auth, request) => {
       }
     }
 
+    if (request.nextUrl.pathname.startsWith("/brothel")) {
+      const brothelStatus = await convex.query(api.players.getBrothelStatus, {
+        userId,
+      });
+      if (request.nextUrl.pathname === "/brothel/serve") {
+        if (brothelStatus === "idle") {
+          return NextResponse.redirect(new URL(`/brothel`, request.url));
+        }
+      } else {
+        if (brothelStatus !== "idle") {
+          return NextResponse.redirect(new URL(`/brothel/serve`, request.url));
+        }
+      }
+    }
+
     if (fightStatus === "idle") {
       if (
         request.nextUrl.pathname !== "/" &&

@@ -21,6 +21,7 @@ export function BrothelSuccessTaskDialog({
   player,
   updateBrothelStatisticsMutation,
   updateGoldStatisticsMutation,
+  updatePlayerBrothelStatusMutation,
 }: {
   showEarnedGold: boolean;
   earnedGold: number;
@@ -34,6 +35,9 @@ export function BrothelSuccessTaskDialog({
   >;
   updateGoldStatisticsMutation: ReturnType<
     typeof useMutation<typeof api.player_statistics.updateGoldStatistics>
+  >;
+  updatePlayerBrothelStatusMutation: ReturnType<
+    typeof useMutation<typeof api.players.updateBrothelStatus>
   >;
 }) {
   const router = useRouter();
@@ -53,6 +57,9 @@ export function BrothelSuccessTaskDialog({
         goldSpent: 0,
         goldEarned: earnedGold,
       },
+    });
+    await updatePlayerBrothelStatusMutation({
+      brothelStatus: "idle",
     });
     setShowEarnedGold(false);
   };

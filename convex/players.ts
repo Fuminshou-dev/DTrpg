@@ -14,6 +14,7 @@ export const createPlayer = mutation({
     }
 
     const player = await ctx.db.insert("players", {
+      brothelStatus: "idle",
       hasSpecialPotionEffect: false,
       userId: args.userId,
       playerName: args.playerName,
@@ -395,5 +396,68 @@ export const updatePlayerSpecialPotionEffect = mutation({
       ...player,
       hasSpecialPotionEffect: args.shouldPlayerHaveSpecialEffect,
     });
+  },
+});
+
+export const updateBrothelStatus = mutation({
+  args: {
+    brothelStatus: v.union(
+      v.literal("idle"),
+      v.object({
+        status: v.literal("hasBrothelTask"),
+        currentTask: v.object({
+          task: v.object({
+            task: v.string(),
+            gold: v.number(),
+          }),
+          customer: v.object({
+            price: v.number(),
+            task: v.number(),
+            customerType: v.string(),
+          }),
+        }),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthorized");
+    }
+    const userId = identity.subject;
+
+    if (!userId) {
+      throw new Error("User ID is required");
+    }
+
+    const player = await ctx.db
+      .query("players")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!player) {
+      throw new Error("Player not found");
+    }
+
+    await ctx.db.patch(player._id, { brothelStatus: args.brothelStatus });
+  },
+});
+
+// Add this new query
+export const getBrothelStatus = query({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const player = await ctx.db
+      .query("players")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .first();
+
+    if (!player) {
+      throw new Error("Player not found");
+    }
+
+    return player.brothelStatus;
   },
 });

@@ -43,6 +43,25 @@ export default defineSchema(
       gold: v.float64(),
       img: v.string(),
       currentMonster: v.number(),
+      brothelStatus: v.optional(
+        v.union(
+          v.literal("idle"),
+          v.object({
+            status: v.literal("hasBrothelTask"),
+            currentTask: v.object({
+              task: v.object({
+                task: v.string(),
+                gold: v.number(),
+              }),
+              customer: v.object({
+                price: v.number(),
+                task: v.number(),
+                customerType: v.string(),
+              }),
+            }),
+          })
+        )
+      ),
       fightStatus: v.union(
         v.literal("idle"),
         v.object({

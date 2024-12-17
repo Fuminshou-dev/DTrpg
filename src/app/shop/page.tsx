@@ -23,6 +23,7 @@ const itemImages: { [key: string]: StaticImageData } = {
 export default function ShopPage() {
   const [errorItemType, setErrorItemType] = useState<string | null>(null);
   const [successItemType, setSuccessItemType] = useState<string | null>(null);
+  const [isButtonLoading, setIsButtonLoading] = useState<boolean>(false);
 
   const items = useQuery(api.shop.getAllShopItems);
   const updateShopStatisticsMutation = useMutation(
@@ -33,6 +34,7 @@ export default function ShopPage() {
   );
   const player = useQuery(api.players.getPlayer);
   const buyItem = useMutation(api.shop.buyItem);
+
   const handleItemBuy = async ({
     price,
     type,
@@ -48,6 +50,7 @@ export default function ShopPage() {
       typeof useMutation<typeof api.player_statistics.updateGoldStatistics>
     >;
   }) => {
+    setIsButtonLoading(true);
     const result = await buyItem({ price, type });
 
     if (!result.success) {
@@ -73,6 +76,10 @@ export default function ShopPage() {
       });
       setSuccessItemType(type);
     }
+
+    setTimeout(() => {
+      setIsButtonLoading(false);
+    }, 2000);
   };
 
   if (!items || !player) {
@@ -126,7 +133,7 @@ export default function ShopPage() {
               </p>
               <div className="flex flex-col justify-center items-center gap-2">
                 <Button
-                  disabled={player.gold < item.price ? true : false}
+                  disabled={isButtonLoading || player.gold < item.price}
                   onClick={() =>
                     handleItemBuy({
                       updateGoldStatisticsMutation,
@@ -144,7 +151,7 @@ export default function ShopPage() {
                       : "w-24 h-12 bg-green-600"
                   }
                 >
-                  Buy
+                  {isButtonLoading ? "Loading..." : "Buy"}
                 </Button>
                 {errorItemType === item.type && (
                   <p className="text-red-500 text-sm">Not enough gold</p>

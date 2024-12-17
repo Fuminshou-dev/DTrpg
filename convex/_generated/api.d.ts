@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as customers from "../customers.js";
 import type * as customer_tasks from "../customer_tasks.js";
+import type * as migrations_add_brothel_status from "../migrations/add_brothel_status.js";
 import type * as monsters from "../monsters.js";
 import type * as players from "../players.js";
 import type * as player_statistics from "../player_statistics.js";
@@ -32,6 +33,7 @@ import type * as shop from "../shop.js";
 declare const fullApi: ApiFromModules<{
   customers: typeof customers;
   customer_tasks: typeof customer_tasks;
+  "migrations/add_brothel_status": typeof migrations_add_brothel_status;
   monsters: typeof monsters;
   players: typeof players;
   player_statistics: typeof player_statistics;
