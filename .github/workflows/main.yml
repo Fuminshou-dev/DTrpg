@@ -35,7 +35,7 @@ jobs:
               
               echo "Setting up environment..."
               echo "Setting up environment variables..."
-              cat > .env.local << 'EOF'
+              cat > .env.local << EOF
               CONVEX_DEPLOY_KEY=${{ secrets.CONVEX_DEPLOY_KEY }}
               CONVEX_DEPLOYMENT=${{ secrets.CONVEX_DEPLOYMENT }}
               NEXT_PUBLIC_CONVEX_URL=${{ secrets.NEXT_PUBLIC_CONVEX_URL }}
@@ -43,7 +43,7 @@ jobs:
               CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}
               NEXT_PUBLIC_CLERK_SIGN_IN_URL=/login
               NEXT_PUBLIC_CLERK_SIGN_UP_URL=/login
-              'EOF'
+              EOF
 
               echo "Installing dependencies..."
               pnpm install --frozen-lockfile || exit 1
