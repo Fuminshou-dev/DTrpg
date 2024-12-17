@@ -47,6 +47,10 @@ jobs:
             
             echo "Deploying to Convex..."
             pnpm convex deploy -y || exit 1
+
+            cd convex/
+            echo "${{ secrets.AUTH_CONFIG_TS }}" > auth.config.ts
+            cd ..
             
             echo "Running build..."
             pnpm run build
