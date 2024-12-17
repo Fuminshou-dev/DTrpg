@@ -1,8 +1,10 @@
+
 name: Deploy to VPS
+
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
@@ -19,34 +21,41 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            {
-              cd dev/DTrpg || exit 1
-              eval $(ssh-agent -s)
-              echo "${{ secrets.GH_DEPLOY_KEY }}" | ssh-add - || exit 1
-              git pull origin master || exit 1
-              
-              # Setup Convex deploy key
-              
-              echo "CONVEX_DEPLOY_KEY=${{ secrets.CONVEX_DEPLOY_KEY }}" > .env.local || exit 1
+            echo "Starting deployment..."
+            cd dev/DTrpg || exit 1
+            
+            echo "Setting up SSH agent..."
+            eval $(ssh-agent -s)
+            echo "${{ secrets.GH_DEPLOY_KEY }}" | ssh-add - || exit 1
+            git reset --hard
+            
+            echo "Fetching latest changes..."
+            git fetch || exit 1
+            
+            echo "Setting up environment..."
+            echo "Setting up environment variables..."
+            echo "CONVEX_DEPLOY_KEY=${{ secrets.CONVEX_DEPLOY_KEY }}" > .env.local
+            echo "CONVEX_DEPLOYMENT=${{ secrets.CONVEX_DEPLOYMENT }}" >> .env.local
+            echo "NEXT_PUBLIC_CONVEX_URL=${{ secrets.NEXT_PUBLIC_CONVEX_URL }}" >> .env.local
+            echo "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}" >> .env.local
+            echo "CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}" >> .env.local
+            echo "NEXT_PUBLIC_CLERK_SIGN_IN_URL=/login" >> .env.local
+            echo "NEXT_PUBLIC_CLERK_SIGN_UP_URL=/login" >> .env.local
 
-              # Install dependencies
-              pnpm install --frozen-lockfile || exit 1
-              
-              # Deploy to Convex
-              pnpm convex deploy -y || exit 1
-              
-              # Run build and store exit code
-              pnpm run build
-              BUILD_EXIT_CODE=$?
-              
-              if [ $BUILD_EXIT_CODE -eq 0 ]; then
-                echo "Build successful, reloading PM2..."
-                pm2 reload dtrpg || exit 1
-              else
-                echo "Build failed, skipping PM2 reload"
-                exit 1
-              fi
-            } || {
-              echo "Deployment failed"
+            echo "Installing dependencies..."
+            pnpm install --frozen-lockfile || exit 1
+            
+            echo "Deploying to Convex..."
+            pnpm convex deploy -y || exit 1
+            
+            echo "Running build..."
+            pnpm run build
+            BUILD_EXIT_CODE=$?
+            
+            if [ $BUILD_EXIT_CODE -eq 0 ]; then
+              echo "Build successful, reloading PM2..."
+              pm2 reload dtrpg --update-env || exit 1
+            else
+              echo "Build failed, skipping PM2 reload"
               exit 1
-            }
+            fi
