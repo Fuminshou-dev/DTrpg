@@ -44,13 +44,17 @@ jobs:
 
             echo "Installing dependencies..."
             pnpm install --frozen-lockfile || exit 1
+
+
+            echo "Setting up production auth"
+            cd convex/
+            echo "${{ secrets.PRODUCTION_AUTH }}" > auth.config.ts
+            cd ..
             
             echo "Deploying to Convex..."
             pnpm convex deploy -y || exit 1
 
-            cd convex/
-            echo "${{ secrets.AUTH_CONFIG_TS }}" > auth.config.ts
-            cd ..
+            
             
             echo "Running build..."
             pnpm run build
