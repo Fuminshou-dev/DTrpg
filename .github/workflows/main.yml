@@ -1,5 +1,6 @@
 
 name: Deploy to VPS
+
 on:
   push:
     branches:
@@ -21,21 +22,28 @@ jobs:
           port: 22
           script: |
             {
+              echo "Starting deployment..."
               cd dev/DTrpg || exit 1
+              
+              echo "Setting up SSH agent..."
               eval $(ssh-agent -s)
               echo "${{ secrets.GH_DEPLOY_KEY }}" | ssh-add - || exit 1
-              git pull origin master || exit 1
+
+              git reset --hard
               
-              # Setup Convex deploy key
+              echo "Fetching latest changes..."
+              git fetch || exit 1
+              
+              echo "Setting up environment..."
               echo "CONVEX_DEPLOY_KEY=${{ secrets.CONVEX_DEPLOY_KEY }}" > .env.local || exit 1
 
-              # Install dependencies
+              echo "Installing dependencies..."
               pnpm install --frozen-lockfile || exit 1
               
-              # Deploy to Convex
+              echo "Deploying to Convex..."
               pnpm convex deploy -y || exit 1
               
-              # Run build and store exit code
+              echo "Running build..."
               pnpm run build
               BUILD_EXIT_CODE=$?
               
