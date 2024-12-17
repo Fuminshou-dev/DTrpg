@@ -30,7 +30,7 @@ jobs:
             git reset --hard
             
             echo "Fetching latest changes..."
-            git fetch || exit 1
+            git pull || exit 1
             
             echo "Setting up environment..."
             echo "Setting up environment variables..."
