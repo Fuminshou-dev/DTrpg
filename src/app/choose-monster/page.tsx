@@ -78,8 +78,8 @@ export default function FightPage() {
         playerHp: playerStats?.hp ?? 0,
       },
     });
-    router.push(`/fight/`);
     setMonsterToConfirm(null);
+    router.push("/fight");
   };
 
   return (

@@ -17,7 +17,6 @@ export default defineSchema(
       gold: v.float64(),
       hp: v.float64(),
       showId: v.number(),
-
       max_dmg: v.float64(),
       min_dmg: v.float64(),
       monster_type: v.string(),
@@ -129,7 +128,9 @@ export default defineSchema(
       price: v.float64(),
       type: v.string(),
     }),
+    randomTable: defineTable({}),
   },
+
   {
     schemaValidation: true,
   }
