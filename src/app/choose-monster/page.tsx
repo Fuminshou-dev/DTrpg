@@ -22,13 +22,13 @@ import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import { Doc } from "../../../convex/_generated/dataModel";
 import {
   calculateFinalDmg,
   calculateMonsterDmg,
   getRandomAtkMultiplier,
   getRandomTask,
 } from "../utils/utilFunctions";
-import { Doc } from "../../../convex/_generated/dataModel";
 
 export default function FightPage() {
   const router = useRouter();
@@ -79,7 +79,7 @@ export default function FightPage() {
       },
     });
     setMonsterToConfirm(null);
-    router.push("/fight");
+    router.refresh();
   };
 
   return (
