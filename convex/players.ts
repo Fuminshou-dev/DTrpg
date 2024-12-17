@@ -2,17 +2,11 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
 export const createPlayer = mutation({
-  args: { playerName: v.string() },
+  args: { playerName: v.string(), userId: v.string() },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-    const userId = identity.subject;
-
     const existingPlayer = await ctx.db
       .query("players")
-      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .filter((q) => q.eq("playerName", args.playerName))
       .first();
 
     if (existingPlayer) {
@@ -21,7 +15,7 @@ export const createPlayer = mutation({
 
     const player = await ctx.db.insert("players", {
       hasSpecialPotionEffect: false,
-      userId: userId,
+      userId: args.userId,
       playerName: args.playerName,
       gold: 0,
       current_exp: 0,
@@ -84,12 +78,13 @@ export const createPlayer = mutation({
         totalBrothelTasksFailed: 0,
       },
       potions: {
+        totalPotionsUsed: 0,
         totalPotionsBought: 0,
         totalHealingPotionsBought: 0,
         totalHealingHiPotionsBought: 0,
         totalRerollPotionsBought: 0,
         totalSpecialPotionsBought: 0,
-        totalHealingpotionsUsed: 0,
+        totalHealingPotionsUsed: 0,
         totalHealingHiPotionsUsed: 0,
         totalRerollPotionsUsed: 0,
         totalSpecialPotionsUsed: 0,
