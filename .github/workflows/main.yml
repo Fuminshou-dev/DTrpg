@@ -1,3 +1,4 @@
+
 name: Deploy to VPS
 on:
   push:
@@ -26,7 +27,6 @@ jobs:
               git pull origin master || exit 1
               
               # Setup Convex deploy key
-              
               echo "CONVEX_DEPLOY_KEY=${{ secrets.CONVEX_DEPLOY_KEY }}" > .env.local || exit 1
 
               # Install dependencies
