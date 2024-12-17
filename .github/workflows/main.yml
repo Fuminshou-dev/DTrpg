@@ -43,7 +43,7 @@ jobs:
               CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}
               NEXT_PUBLIC_CLERK_SIGN_IN_URL=/login
               NEXT_PUBLIC_CLERK_SIGN_UP_URL=/login
-              EOF
+              'EOF'
 
               echo "Installing dependencies..."
               pnpm install --frozen-lockfile || exit 1
