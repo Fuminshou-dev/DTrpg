@@ -44,7 +44,6 @@ export function BrothelSuccessTaskDialog({
 
   const handleCloseDialog = async () => {
     setShowEarnedGold(false);
-    router.replace("/brothel");
 
     await updateGoldMutation({ money: earnedGold });
     await updateBrothelStatisticsMutation({
@@ -61,6 +60,7 @@ export function BrothelSuccessTaskDialog({
     await updatePlayerBrothelStatusMutation({
       brothelStatus: "idle",
     });
+    router.replace("/brothel");
     setShowEarnedGold(false);
   };
 
