@@ -54,7 +54,7 @@ jobs:
             
             if [ $BUILD_EXIT_CODE -eq 0 ]; then
               echo "Build successful, reloading PM2..."
-              pm2 reload dtrpg || exit 1
+              pm2 reload dtrpg --update-env || exit 1
             else
               echo "Build failed, skipping PM2 reload"
               exit 1
