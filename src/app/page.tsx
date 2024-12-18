@@ -185,6 +185,7 @@ export default function Home() {
             <AlertDialogAction
               onClick={() => {
                 setExplainRules(false);
+                router.push("/main");
               }}
             >
               Got it, let's go.

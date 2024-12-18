@@ -1,22 +1,43 @@
+import { differenceInDays } from "date-fns";
 import { Doc } from "../../convex/_generated/dataModel";
 
 interface PlayerStatisticsProps {
   playerStatistics: Doc<"player_statistics">;
   showDetails: boolean;
+  player: Doc<"players">;
 }
 
 export default function PlayerStatistics({
   playerStatistics,
   showDetails,
+  player,
 }: PlayerStatisticsProps) {
+  const playerCreationDate = new Date(player._creationTime);
+  const today = new Date();
+  const date = differenceInDays(today, playerCreationDate);
   return (
     <div
       className={
         showDetails
-          ? "flex flex-wrap xl:flex-nowrap justify-center gap-4 w-full h-full text-lg mt-8"
+          ? "flex flex-wrap xl:flex-nowrap justify-center px-2 gap-4 w-full h-full text-lg mt-4"
           : "hidden"
       }
     >
+      <div className="mb-4 w-full sm:w-1/2 md:w-1/3 lg:w-1/5 border flex flex-col justify-start items-center gap-2 px-6 py-2">
+        <p className="text-2xl mt-2 border-b-2 mb-2 border-red-500 w-full text-center">
+          {player.playerName}
+        </p>
+        <div className="text-xl text-pretty">
+          <p className="border-b-2 mb-2 border-slate-500">
+            Total time played: <span className="text-green-500">{date}</span>{" "}
+            days
+          </p>
+          <p>
+            Level: <span className="text-orange-400">{player.level}</span>
+          </p>
+        </div>
+      </div>
+
       <div className="mb-4 w-full sm:w-1/2 md:w-1/3 lg:w-1/5 border flex flex-col justify-start items-start gap-2 px-6 py-2">
         <h3 className="text-2xl mt-2 border-b-2 mb-2 border-red-500 w-full text-center text-yellow-400">
           Gold

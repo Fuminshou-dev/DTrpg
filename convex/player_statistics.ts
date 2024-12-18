@@ -340,3 +340,73 @@ export const updatePlayerMonstersStatistics = mutation({
     });
   },
 });
+
+export const resetPlayerStatistics = mutation({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthorized");
+    }
+    const userId = identity.subject;
+    const player = await ctx.db
+      .query("players")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!player) {
+      throw new Error("Player not found");
+    }
+    const playerSpecificStats = await ctx.db
+      .query("player_statistics")
+      .withIndex("by_playerId", (q) => q.eq("playerId", player._id))
+      .first();
+
+    if (!playerSpecificStats) {
+      throw new Error("Player statistics not found");
+    }
+
+    // Reset all statistics to their initial values
+    await ctx.db.patch(playerSpecificStats._id, {
+      gold: {
+        totalEarned: 0,
+        totalSpent: 0,
+      },
+      monsters: {
+        totalMonstersDefeated: 0,
+        monsterSpecificStats: {
+          goblin: 0,
+          werewolf: 0,
+          minotaur: 0,
+          vampire: 0,
+          fox: 0,
+          priest: 0,
+          diety: 0,
+        },
+      },
+      combat: {
+        totalCombatTasks: 0,
+        totalDamageDealt: 0,
+        totalDamageTaken: 0,
+        totalCombatTasksCompleted: 0,
+        totalCombatTasksFailed: 0,
+      },
+      brothel: {
+        totalBrothelTasks: 0,
+        totalBrothelTasksCompleted: 0,
+        totalBrothelTasksFailed: 0,
+      },
+      potions: {
+        totalPotionsUsed: 0,
+        totalPotionsBought: 0,
+        totalHealingPotionsBought: 0,
+        totalHealingHiPotionsBought: 0,
+        totalRerollPotionsBought: 0,
+        totalSpecialPotionsBought: 0,
+        totalHealingPotionsUsed: 0,
+        totalHealingHiPotionsUsed: 0,
+        totalRerollPotionsUsed: 0,
+        totalSpecialPotionsUsed: 0,
+      },
+    });
+  },
+});

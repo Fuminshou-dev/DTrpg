@@ -10,14 +10,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Doc } from "../../convex/_generated/dataModel";
@@ -91,63 +83,23 @@ export default function FailDialog({
 
   return (
     <AlertDialog open={showFailAttackDialog}>
-      <AlertDialogContent className="max-w-full sm:max-w-[425px]">
+      <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-xl sm:text-2xl">
+          <AlertDialogTitle className="text-xl">
             You are a failure!
           </AlertDialogTitle>
-          <AlertDialogDescription
-            asChild
-            className="flex flex-col text-base sm:text-lg"
-          >
-            <div>
-              <span>You have failed the task. What a pity.</span>
-              <Table className="mt-4 sm:mt-8">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-xl sm:text-3xl"></TableHead>
-                    <TableHead className="text-xl sm:text-3xl text-red-500">
-                      {monster.monster_type}
-                    </TableHead>
-                    <TableHead className="text-xl sm:text-3xl text-green-500">
-                      Player
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="text-lg sm:text-2xl">
-                      Attack
-                    </TableCell>
-                    <TableCell className="text-lg sm:text-2xl text-red-500">
-                      {monsterAtk}
-                    </TableCell>
-                    <TableCell className="text-lg sm:text-2xl text-red-500">
-                      0
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="text-lg sm:text-2xl">HP</TableCell>
-                    <TableCell className="text-lg sm:text-2xl text-red-500">
-                      {monsterHp}
-                    </TableCell>
-                    <TableCell className="text-lg sm:text-2xl text-green-500">
-                      {playerHp}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="text-lg sm:text-2xl">
-                      New HP
-                    </TableCell>
-                    <TableCell className="text-lg sm:text-2xl text-red-500">
-                      {monsterHp}
-                    </TableCell>
-                    <TableCell className="text-lg sm:text-2xl text-green-500">
-                      {playerHp - monsterAtk}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+          <AlertDialogDescription asChild className="text-xl">
+            <div className="flex flex-col gap-2">
+              <p>You have failed the task. What a pity.</p>
+              <p>
+                The{" "}
+                <span className="text-rose-500">{monster.monster_type}</span>{" "}
+                will deal dmg to you.
+              </p>
+              <p>
+                You will <span className="text-red-500">not</span> deal damage
+                to <span className="text-rose-500">{monster.monster_type}</span>
+              </p>
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>

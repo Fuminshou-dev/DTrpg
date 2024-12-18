@@ -4,27 +4,16 @@ import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
+import PageControls from "@/components/Controls";
 import ErrorDialog from "@/components/ErrorDialog";
+import { MainPageItemsDialog } from "@/components/MainPageItemsDialog";
 import PlayerStatistics from "@/components/PlayerStatistics";
 import { useMutation, useQuery } from "convex/react";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "../../../convex/_generated/api";
-import {
-  ItemDescriptions,
-  itemImages,
-  itemOrder,
-  itemTypes,
-} from "../utils/constants";
-import PageControls from "@/components/Controls";
+import { UseSpecialPotionProps } from "../utils/constants";
 
 function BrothelButton({
   getPlayerBrothelCooldownQuery,
@@ -141,20 +130,7 @@ export default function MainPage() {
     setErrorMsg,
     setIsButtonLoading,
     updatePlayerPotionStatisticsMutation,
-  }: {
-    itemType: itemTypes;
-    updatePlayerItemsAfterUseMutation: ReturnType<
-      typeof useMutation<typeof api.players.updatePlayerItemsAfterUse>
-    >;
-    updatePlayerPotionStatisticsMutation: ReturnType<
-      typeof useMutation<
-        typeof api.player_statistics.updatePlayerPotionStatistics
-      >
-    >;
-    setShowError: (value: boolean) => void;
-    setErrorMsg: (value: string) => void;
-    setIsButtonLoading: (value: boolean) => void;
-  }) => {
+  }: UseSpecialPotionProps) => {
     setIsButtonLoading(true);
     try {
       if (player.hasSpecialPotionEffect) {
@@ -183,7 +159,9 @@ export default function MainPage() {
         shouldPlayerHaveSpecialEffect: true,
       });
     } finally {
-      setIsButtonLoading(false);
+      setTimeout(() => {
+        setIsButtonLoading(false);
+      }, 1000);
     }
   };
 
@@ -205,6 +183,7 @@ export default function MainPage() {
         {playerStatistics && (
           <div className="w-full mb-8">
             <PlayerStatistics
+              player={player}
               playerStatistics={playerStatistics}
               showDetails={showDetails}
             />
@@ -219,7 +198,7 @@ export default function MainPage() {
           }
         >
           <div className="flex flex-col gap-4 justify-between items-center border rounded-lg p-4 md:p-6 h-full">
-            <h2 className="text-2xl md:text-3xl">
+            <h2 className="text-2xl md:text-3xl text-center">
               {player.playerName}
               {player.hasSpecialPotionEffect && (
                 <p
@@ -260,9 +239,7 @@ export default function MainPage() {
               value={progressValue}
               className="w-full"
             />
-            <Button onClick={() => setShowItems(!showItems)}>
-              {showItems ? "Hide Items" : "Show Items"}
-            </Button>
+            <Button onClick={() => setShowItems(!showItems)}>Show Items</Button>
           </div>
 
           <div className="flex flex-col gap-4 justify-between items-center h-full">
@@ -285,100 +262,22 @@ export default function MainPage() {
             </Button>
           </div>
 
-          {showItems && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-evenly items-center w-full h-full">
-              {itemOrder
-                .map(
-                  (orderType) =>
-                    player.items.find((item) => item.type === orderType)!
-                )
-                .map((item) => (
-                  <div
-                    key={item.type}
-                    className="flex flex-col border items-center rounded-lg h-full p-2 sm:p-4 gap-2"
-                  >
-                    <h1 className="text-lg sm:text-xl md:text-2xl font-semibold">
-                      {item.itemName}
-                    </h1>
-                    <Image
-                      src={itemImages[item.type]}
-                      alt={item.type}
-                      width={40}
-                      height={40}
-                      className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16"
-                    />
-                    <div className="text-xs sm:text-sm md:text-base text-center">
-                      {ItemDescriptions[item.type]}
-                    </div>
-                    <div className="text-sm sm:text-base md:text-lg">
-                      You have:{" "}
-                      <span
-                        className={
-                          item.amount === 0 ? "text-red-500" : "text-green-500"
-                        }
-                      >
-                        {item.amount}
-                      </span>{" "}
-                      of this item
-                    </div>
-                    {item.type === "special" ? (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              onClick={() =>
-                                handleUseSpecialPotion({
-                                  setIsButtonLoading,
-                                  updatePlayerPotionStatisticsMutation,
-                                  itemType: "special",
-                                  setErrorMsg,
-                                  setShowError,
-                                  updatePlayerItemsAfterUseMutation,
-                                })
-                              }
-                              disabled={item.amount <= 0 || isButtonLoading}
-                              className="text-xs sm:text-sm md:text-base"
-                            >
-                              Use
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {item.amount <= 0 ? (
-                              <p className="text-xs sm:text-sm md:text-base">
-                                You don't have any of this item to use
-                              </p>
-                            ) : (
-                              <p className="text-xs sm:text-sm md:text-base">
-                                Use this item to double your experience and
-                                damage
-                              </p>
-                            )}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ) : (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              disabled
-                              className="text-xs sm:text-sm md:text-base"
-                            >
-                              Use
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="text-xs sm:text-sm md:text-base">
-                              You can only use this item during combat
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                  </div>
-                ))}
-            </div>
-          )}
+          <MainPageItemsDialog
+            handleUseSpecialPotion={handleUseSpecialPotion}
+            isButtonLoading={isButtonLoading}
+            player={player}
+            setErrorMsg={setErrorMsg}
+            setIsButtonLoading={setIsButtonLoading}
+            setShowError={setShowError}
+            setShowItems={setShowItems}
+            showItems={showItems}
+            updatePlayerItemsAfterUseMutation={
+              updatePlayerItemsAfterUseMutation
+            }
+            updatePlayerPotionStatisticsMutation={
+              updatePlayerPotionStatisticsMutation
+            }
+          />
         </div>
       </div>
     </div>

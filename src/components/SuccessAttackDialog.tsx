@@ -10,18 +10,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useMutation } from "convex/react";
+import React from "react";
 import { api } from "../../convex/_generated/api";
 import { Doc } from "../../convex/_generated/dataModel";
-import React from "react";
 
 export default function SuccessAttackDialog({
   playerHp,
@@ -134,62 +126,26 @@ export default function SuccessAttackDialog({
 
   return (
     <AlertDialog open={showSuccessAttackDialog}>
-      <AlertDialogContent className="max-w-full sm:max-w-3xl">
+      <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-2xl text-center">
+          <AlertDialogTitle className="text-xl">
             Congratulations!
           </AlertDialogTitle>
-          <AlertDialogDescription asChild className="flex flex-col text-lg">
-            <div>
-              <span className="border-b-4 text-center block">
-                You have successfully completed the task!
-              </span>
-              <Table className="mt-8">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-xl sm:text-3xl"></TableHead>
-                    <TableHead className="text-xl sm:text-3xl text-red-500">
-                      {monster.monster_type}
-                    </TableHead>
-                    <TableHead className="text-xl sm:text-3xl text-green-500">
-                      Player
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="text-lg sm:text-2xl">
-                      Attack
-                    </TableCell>
-                    <TableCell className="text-lg sm:text-2xl text-red-500">
-                      {monsterAtk}
-                    </TableCell>
-                    <TableCell className="text-lg sm:text-2xl text-green-500">
-                      {finalDmg}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="text-lg sm:text-2xl">HP</TableCell>
-                    <TableCell className="text-lg sm:text-2xl text-red-500">
-                      {monsterHp}
-                    </TableCell>
-                    <TableCell className="text-lg sm:text-2xl text-green-500">
-                      {playerHp}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="text-lg sm:text-2xl">
-                      New HP
-                    </TableCell>
-                    <TableCell className="text-lg sm:text-2xl text-red-500">
-                      {monsterHp - finalDmg}
-                    </TableCell>
-                    <TableCell className="text-lg sm:text-2xl text-green-500">
-                      {playerHp - monsterAtk}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+          <AlertDialogDescription asChild className="text-xl">
+            <div className="flex flex-col gap-2">
+              <p>
+                You have <span className="text-green-600">completed</span> the
+                task.
+              </p>
+              <p>
+                You will deal damage to the{" "}
+                <span className="text-rose-500">{monster.monster_type}</span>.
+              </p>
+              <p>
+                And the{" "}
+                <span className="text-rose-500">{monster.monster_type}</span>{" "}
+                will deal damage to you.
+              </p>
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>

@@ -1,34 +1,23 @@
 "use client";
+import PageControls from "@/components/Controls";
 import ErrorDialog from "@/components/ErrorDialog";
 import EvilDeityVictoryScreen from "@/components/EvilDeityVictoryScreen";
 import FailDialog from "@/components/FailAttackDialog";
+import { ItemsDialog } from "@/components/ItemsDialog";
 import MonsterDeadDialog from "@/components/MonsterDeadDialog";
 import PlayerDeadDialog from "@/components/PlayerDeadDialog";
 import SuccessAttackDialog from "@/components/SuccessAttackDialog";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Progress } from "@/components/ui/progress";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useMutation, useQuery } from "convex/react";
-import Image from "next/image";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
-import {
-  ItemDescriptions,
-  itemImages,
-  itemOrder,
-  itemTypes,
-} from "../utils/constants";
+import { itemTypes, UseRollPotionProps } from "../utils/constants";
 import {
   calculateHealAmount,
   updatePlayerFightStatus,
 } from "../utils/utilFunctions";
-import PageControls from "@/components/Controls";
 
 export default function MonsterFightPage() {
   const player = useQuery(api.players.getPlayer);
@@ -39,7 +28,7 @@ export default function MonsterFightPage() {
   const [isMonsterDead, setIsMonsterDead] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [isLastBossDead, setIsLastBossDead] = useState(false);
+  const [isLastBossDead, setIsLastBossDead] = useState(true);
   const [showItems, setShowItems] = useState(false);
   const playerLevel = player?.level ?? 0;
 
@@ -86,7 +75,6 @@ export default function MonsterFightPage() {
     monsterHp,
     playerAtk,
     monsterAtk,
-    atkMultiplier,
     finalDmg,
     currentTask,
   } = playerFightStatus || {};
@@ -123,17 +111,7 @@ export default function MonsterFightPage() {
     hasSpecialPotionEffect,
     itemType,
     updatePlayerFightStatusMutation,
-  }: {
-    playerAtk: number;
-    monsterId: number;
-    monsterHp: number;
-    playerHp: number;
-    itemType: itemTypes;
-    updatePlayerFightStatusMutation: ReturnType<
-      typeof useMutation<typeof api.players.updatePlayerFightStatus>
-    >;
-    hasSpecialPotionEffect: boolean;
-  }) => {
+  }: UseRollPotionProps) => {
     setIsButtonLoading(true);
     const result = await updatePlayerItemsAfterUseMutation({
       itemType: itemType,
@@ -232,83 +210,110 @@ export default function MonsterFightPage() {
     setIsButtonLoading(false);
   };
 
-  return (
-    <div className="container mx-auto">
-      <EvilDeityVictoryScreen
-        player={player}
-        isLastBossDead={isLastBossDead}
-        setIsLastBossDead={setIsLastBossDead}
-      />
-      <ErrorDialog
-        errorMsg={errorMsg}
-        setErrorMsg={setErrorMsg}
-        setShowError={setShowError}
-        showError={showError}
-      />
-      <PlayerDeadDialog
-        isPlayerDead={isPlayerDead}
-        playerId={player._id}
-        resetPlayer={resetPlayerMutation}
-        setIsPlayerDead={setIsPlayedDead}
-      />
-      <SuccessAttackDialog
-        updatePlayerGoldMutation={updatePlayerGoldMutation}
-        updatePlayerMonstersStatisticsMutation={
-          updatePlayerMonstersStatisticsMutation
-        }
-        updatePlayerCombatStatisticsMutation={
-          updatePlayerCombatStatisticsMutation
-        }
-        setIsLastBossDead={setIsLastBossDead}
-        hasSpecialPotionEffect={player.hasSpecialPotionEffect}
-        setIsMonsterDead={setIsMonsterDead}
-        setIsPlayerDead={setIsPlayedDead}
-        finalDmg={finalDmg ?? 0}
-        monster={currentMonster}
-        monsterId={currentMonster.showId}
-        playerAtk={playerAtk ?? 0}
-        playerStats={levelStats}
-        updatePlayerFightStatusMutation={updatePlayerFightStatusMutation}
-        setShowSuccessAttackDialog={setShowSuccessAttackDialog}
-        showSuccessAttackDialog={showSuccessAttackDialog}
-        playerHp={playerHp ?? 0}
-        monsterHp={monsterHp ?? 0}
-        monsterAtk={monsterAtk ?? 0}
-      />
-      <FailDialog
-        updatePlayerCombatStatisticsMutation={
-          updatePlayerCombatStatisticsMutation
-        }
-        setIsPlayerDead={setIsPlayedDead}
-        hasSpecialPotionEffect={player.hasSpecialPotionEffect}
-        monster={currentMonster}
-        monsterId={currentMonster.showId}
-        playerAtk={playerAtk ?? 0}
-        playerStats={levelStats}
-        updatePlayerFightStatusMutation={updatePlayerFightStatusMutation}
-        setShowFailAttackDialog={setShowFailAttackDialog}
-        showFailAttackDialog={showFailAttackDialog}
-        playerHp={playerHp ?? 0}
-        monsterHp={monsterHp ?? 0}
-        monsterAtk={monsterAtk ?? 0}
-      />
-      <MonsterDeadDialog
-        nextLevelStats={nextLevelStats}
-        levelStats={levelStats}
-        player={player}
-        isMonsterDead={isMonsterDead}
-        monster={currentMonster}
-        setIsMonsterDead={setIsMonsterDead}
-        updatePlayerAfterDefeatingAMonster={
-          updatePlayerAfterDefeatingAMonsterMutation
-        }
-      />
+  const itemsDialogProps = {
+    setShowItems: setShowItems,
+    showItems: showItems,
+    player,
+    playerHp: playerHp ?? 0,
+    levelStats,
+    monsterHp: monsterHp ?? 0,
+    monsterId: monsterId ?? 0,
+    playerAtk: playerAtk ?? 0,
+    updatePlayerFightStatusMutation,
+    handleUseHealingItem,
+    handleUseRerollPotion,
+    isButtonLoading,
+  };
 
+  return (
+    <div className="container mx-auto min-h-screen justify-center items-center flex flex-col">
+      {showItems && <ItemsDialog {...itemsDialogProps} />}
+      {isLastBossDead && (
+        <EvilDeityVictoryScreen
+          player={player}
+          isLastBossDead={isLastBossDead}
+          setIsLastBossDead={setIsLastBossDead}
+        />
+      )}
+      {showError && (
+        <ErrorDialog
+          errorMsg={errorMsg}
+          setErrorMsg={setErrorMsg}
+          setShowError={setShowError}
+          showError={showError}
+        />
+      )}
+      {isPlayerDead && (
+        <PlayerDeadDialog
+          isPlayerDead={isPlayerDead}
+          playerId={player._id}
+          resetPlayer={resetPlayerMutation}
+          setIsPlayerDead={setIsPlayedDead}
+        />
+      )}
+      {showSuccessAttackDialog && (
+        <SuccessAttackDialog
+          updatePlayerGoldMutation={updatePlayerGoldMutation}
+          updatePlayerMonstersStatisticsMutation={
+            updatePlayerMonstersStatisticsMutation
+          }
+          updatePlayerCombatStatisticsMutation={
+            updatePlayerCombatStatisticsMutation
+          }
+          setIsLastBossDead={setIsLastBossDead}
+          hasSpecialPotionEffect={player.hasSpecialPotionEffect}
+          setIsMonsterDead={setIsMonsterDead}
+          setIsPlayerDead={setIsPlayedDead}
+          finalDmg={finalDmg ?? 0}
+          monster={currentMonster}
+          monsterId={currentMonster.showId}
+          playerAtk={playerAtk ?? 0}
+          playerStats={levelStats}
+          updatePlayerFightStatusMutation={updatePlayerFightStatusMutation}
+          setShowSuccessAttackDialog={setShowSuccessAttackDialog}
+          showSuccessAttackDialog={showSuccessAttackDialog}
+          playerHp={playerHp ?? 0}
+          monsterHp={monsterHp ?? 0}
+          monsterAtk={monsterAtk ?? 0}
+        />
+      )}
+      {showFailAttackDialog && (
+        <FailDialog
+          updatePlayerCombatStatisticsMutation={
+            updatePlayerCombatStatisticsMutation
+          }
+          setIsPlayerDead={setIsPlayedDead}
+          hasSpecialPotionEffect={player.hasSpecialPotionEffect}
+          monster={currentMonster}
+          monsterId={currentMonster.showId}
+          playerAtk={playerAtk ?? 0}
+          playerStats={levelStats}
+          updatePlayerFightStatusMutation={updatePlayerFightStatusMutation}
+          setShowFailAttackDialog={setShowFailAttackDialog}
+          showFailAttackDialog={showFailAttackDialog}
+          playerHp={playerHp ?? 0}
+          monsterHp={monsterHp ?? 0}
+          monsterAtk={monsterAtk ?? 0}
+        />
+      )}
+      {isMonsterDead && (
+        <MonsterDeadDialog
+          nextLevelStats={nextLevelStats}
+          levelStats={levelStats}
+          player={player}
+          isMonsterDead={isMonsterDead}
+          monster={currentMonster}
+          setIsMonsterDead={setIsMonsterDead}
+          updatePlayerAfterDefeatingAMonster={
+            updatePlayerAfterDefeatingAMonsterMutation
+          }
+        />
+      )}
       <div
         className={
           isLastBossDead
-            ? "flex flex-col justify-center min-h-screen blur"
-            : "flex flex-col justify-between py-2 min-h-screen border"
+            ? "hidden"
+            : "flex flex-col justify-center items-center py-2 h-full w-full"
         }
       >
         <div className="mb-2">
@@ -318,118 +323,59 @@ export default function MonsterFightPage() {
           className="w-fit self-center"
           onClick={() => setShowItems(!showItems)}
         >
-          {showItems ? "Hide Items" : "Show Items"}
+          Backpack
         </Button>
 
-        <div
-          className={`m-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-2 gap-2 ${showItems ? "" : "hidden"}`}
-        >
-          {player.items
-            .sort(
-              (a, b) => itemOrder.indexOf(a.type) - itemOrder.indexOf(b.type)
-            )
-            .map((item) => (
-              <div
-                key={item.type}
-                className="text-white border p-2 sm:p-4 rounded aspect-square flex flex-col justify-evenly items-center gap-1 sm:gap-2 relative"
-              >
-                <Image
-                  className="absolute w-full h-full blur-sm rounded-xl"
-                  src={itemImages[item.type]}
-                  alt="123"
-                />{" "}
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <div className="absolute top-2 flex justify-center items-center right-2 p-1 border rounded-full w-5 h-5">
-                        <p className="text-center text-xs select-none">i</p>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent className="p-2 text-lg">
-                      {ItemDescriptions[item.type]}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <p className="z-10 text-xs sm:text-sm">{item.itemName}</p>
-                {item.amount === 0 ? (
-                  <p className=" z-10">
-                    You have:{" "}
-                    <span className="text-red-500">{item.amount}</span>
-                  </p>
-                ) : (
-                  <p className="z-10">
-                    You have:{" "}
-                    <span className="text-green-500 ">{item.amount}</span>
-                  </p>
-                )}
-                <Button
-                  className="z-50 text-xs sm:text-sm"
-                  onClick={() => {
-                    if (item.type === "restore1" || item.type === "restore2") {
-                      if (playerHp && levelStats) {
-                        handleUseHealingItem(
-                          playerHp,
-                          levelStats.hp,
-                          item.type
-                        );
-                      }
-                    } else {
-                      handleUseRerollPotion({
-                        hasSpecialPotionEffect: player.hasSpecialPotionEffect,
-                        monsterHp: monsterHp ?? 0,
-                        monsterId: monsterId ?? 0,
-                        itemType: item.type,
-                        playerAtk: playerAtk ?? 0,
-                        playerHp: playerHp ?? 0,
-                        updatePlayerFightStatusMutation,
-                      });
-                    }
-                  }}
-                  disabled={
-                    item.amount === 0 ||
-                    item.type === "special" ||
-                    isButtonLoading
-                  }
-                  size={"sm"}
-                >
-                  Use
-                </Button>
-              </div>
-            ))}
-        </div>
-
-        <div className="flex flex-col gap-6 max-w-2xl mx-auto w-full p-2">
-          <div className="flex flex-col md:flex-row gap-6 max-w-4xl mx-auto w-full">
-            <div className="flex-1 flex flex-col justify-center items-center border rounded-lg p-4 shadow-md">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">
+        <div className="flex flex-col gap-6 max-w-2xl mx-auto w-full p-2 ">
+          <div className="flex md:flex-row gap-6 max-w-4xl mx-auto w-full">
+            <div
+              id="monsterDiv"
+              className="flex flex-col justify-center items-center border rounded-lg p-4 shadow-md w-full"
+            >
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 text-rose-500 flex flex-col justify-center items-center">
                 {currentMonster.monster_type}
+                <p className="text-sm italic selection:text-yellow-50">
+                  Lvl:{" "}
+                  <span className="text-rose-500">
+                    {currentMonster.showId + 1}
+                  </span>
+                </p>
               </h1>
               <div className="w-full max-w-md flex flex-col">
-                <p className="text-end text-red-500 mb-1 text-sm sm:text-base">
+                <p className="text-end text-rose-500 mb-1 text-sm sm:text-base">
                   {monsterHp}/{currentMonster.hp}
                 </p>
                 <Progress
                   value={monsterHp && (monsterHp / currentMonster.hp) * 100}
-                  indicatorcolor="bg-red-500"
+                  indicatorcolor="bg-rose-500"
                 />
               </div>
               <div className="mt-4 text-center text-sm sm:text-base">
                 <p>
-                  Hp: <span className="text-red-500">{currentMonster.hp}</span>
-                </p>
-                <p>
                   Damage:{" "}
-                  <span className="text-red-500">{currentMonster.min_dmg}</span>
+                  <span className="text-rose-500">
+                    {currentMonster.min_dmg}
+                  </span>
                   -
-                  <span className="text-red-500">{currentMonster.max_dmg}</span>
+                  <span className="text-rose-500">
+                    {currentMonster.max_dmg}
+                  </span>
                 </p>
+                <p>&nbsp;</p>
+                <p className="py-4 sm:hidden">&nbsp;</p>
               </div>
             </div>
 
-            <div className="flex-1 flex flex-col justify-center items-center border rounded-lg p-4 shadow-md relative">
-              <p className="text-2xl md:text-3xl font-bold mb-2">
+            <div
+              id="playerDiv"
+              className="flex flex-col justify-center items-center border rounded-lg p-4 shadow-md relative w-full"
+            >
+              <h1 className="text-2xl md:text-3xl font-bold mb-2 text-green-500 flex flex-col justify-center items-center">
                 {player.playerName}
-              </p>
+                <p className="text-sm italic text-yellow-50">
+                  Lvl: <span className="text-yellow-300">{player.level}</span>
+                </p>
+              </h1>
               <div className="w-full max-w-md flex flex-col">
                 <p className="text-end text-green-500 mb-1">
                   {playerHp}/{levelStats?.hp}
@@ -451,38 +397,20 @@ export default function MonsterFightPage() {
                   </p>
                 )}
               </div>
-              <div className="mt-4 text-center">
+              <div className="mt-4 text-center flex flex-col">
                 <p>
-                  Atk Multiplier for this task:
-                  <span
-                    className={
-                      atkMultiplier && atkMultiplier > 1
-                        ? "text-green-500"
-                        : "text-red-500"
-                    }
-                  >
-                    {" "}
-                    {atkMultiplier}
-                  </span>
+                  Base damage:{" "}
+                  <span className="text-green-400"> {playerAtk}</span>
                 </p>
+
                 <p>
-                  Final damage dealt to monster:{" "}
-                  {finalDmg !== undefined && (
-                    <>
-                      {finalDmg <= 0 ? (
-                        <span className="text-red-500">{finalDmg}</span>
-                      ) : player.hasSpecialPotionEffect ? (
-                        <span className="bg-gradient-to-r bg-clip-text text-transparent from-blue-500 via-purple-500 to-indigo-500">
-                          {finalDmg}
-                        </span>
-                      ) : (
-                        <span className="text-green-500">{finalDmg}</span>
-                      )}
-                    </>
-                  )}
-                  {finalDmg === undefined && (
-                    <span className="text-gray-500">Not available</span>
-                  )}
+                  Possible attack multipliers:{" "}
+                  <span className="text-red-500">0</span>,
+                  <span className="text-blue-500">1</span>,
+                  <span className="text-yellow-500">2</span>,
+                  <span className="text-yellow-500">2</span>,
+                  <span className="text-purple-500">3</span>,
+                  <span className="text-green-500">4</span>
                 </p>
               </div>
             </div>
