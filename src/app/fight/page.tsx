@@ -28,7 +28,7 @@ export default function MonsterFightPage() {
   const [isMonsterDead, setIsMonsterDead] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [isLastBossDead, setIsLastBossDead] = useState(true);
+  const [isLastBossDead, setIsLastBossDead] = useState(false);
   const [showItems, setShowItems] = useState(false);
   const playerLevel = player?.level ?? 0;
 
