@@ -6,7 +6,7 @@ export const createPlayer = mutation({
   handler: async (ctx, args) => {
     const existingPlayer = await ctx.db
       .query("players")
-      .filter((q) => q.eq("playerName", args.playerName))
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first();
 
     if (existingPlayer) {
@@ -426,9 +426,8 @@ export const updateBrothelStatus = mutation({
     }
     const userId = identity.subject;
 
-    if (!userId) {
-      throw new Error("User ID is required");
-    }
+    // Log the userId for debugging
+    console.log("User ID:", userId);
 
     const player = await ctx.db
       .query("players")
@@ -439,6 +438,8 @@ export const updateBrothelStatus = mutation({
       throw new Error("Player not found");
     }
 
+    // Log the player ID for debugging
+    console.log("Player ID:", player._id);
     await ctx.db.patch(player._id, { brothelStatus: args.brothelStatus });
   },
 });
